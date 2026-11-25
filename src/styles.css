@@ -47,6 +47,7 @@
   .btn.primary:hover:not(:disabled) { background: #fff; border-color: #fff; }
   .btn.small { min-height: 34px; padding: 0 14px; font-size: 13px; }
   .btn.ghost { border-color: transparent; padding: 0 8px; color: var(--dim); }
+  a.btn { text-decoration: none; }
   .btn.ghost:hover:not(:disabled) { color: var(--fg); background: transparent; border-color: transparent; }
   .icon-btn { width: 40px; min-height: 40px; padding: 0; }
 
