@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Font Fight 3D</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Caveat&family=Fraunces&family=Inter&family=JetBrains+Mono:wght@400;600&family=Merriweather&family=Oswald&family=Pacifico&family=Playfair+Display&family=Space+Mono&family=Work+Sans&display=swap">
+<style>
+  :root {
+    --ink: #16181d; --paper: #fffefa; --muted: #646b78; --line: #16181d;
+    --hp: #3ccf6e; --hp-mid: #f2b632; --hp-low: #e5484d; --xp: #2f7fd0;
+    --ui: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --data: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #cfe6f2; font-family: var(--ui); color: var(--ink); }
+  canvas { display: block; }
+  .hidden { display: none !important; }
+  button { font: inherit; color: var(--ink); cursor: pointer; }
+  button:focus-visible { outline: 3px solid var(--xp); outline-offset: 2px; }
+
+  #hud { position: fixed; top: 12px; left: 12px; display: grid; gap: 6px; width: min(260px, 60vw); pointer-events: none; }
+  .mini { background: var(--paper); border: 2px solid var(--line); border-radius: 6px; padding: 6px 10px; box-shadow: 3px 3px 0 var(--line); }
+  .mini .row { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; gap: 8px; }
+  .mini .row span:last-child { font-family: var(--data); font-size: 12px; }
+  .bar { height: 8px; background: #e4e6ec; border-radius: 2px; overflow: hidden; margin-top: 4px; border: 1.5px solid var(--line); }
+  .bar i { display: block; height: 100%; width: 100%; background: var(--hp); transition: width .4s; }
+  .bar.xp { height: 5px; border-width: 1px; } .bar.xp i { background: var(--xp); }
+  #help { position: fixed; top: 12px; right: 12px; max-width: 310px; font-size: 13px; line-height: 1.45; }
+  #help b { font-weight: 700; font-size: 15px; }
+  #reset { pointer-events: auto; margin-top: 6px; background: none; border: 1.5px solid var(--line); border-radius: 4px; padding: 2px 10px; font-size: 12px; }
+  #toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); font-weight: 600; transition: opacity .3s; pointer-events: none; max-width: 90vw; text-align: center; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--data); font-size: 14px; background: #cfe6f2; }
+
+  #pad { position: fixed; left: 16px; bottom: 16px; display: grid; grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(3, 54px); gap: 4px; }
+  #pad button { background: rgba(255,254,250,.85); border: 2px solid var(--line); border-radius: 8px; font-size: 20px; touch-action: none; user-select: none; }
+  @media (hover: hover) and (pointer: fine) { #pad { display: none; } }
+
+  #battle { position: fixed; inset: 0; pointer-events: none; }
+  .card { position: absolute; background: var(--paper); border: 3px solid var(--line); border-radius: 6px; padding: 10px 14px; width: min(320px, 82vw); box-shadow: 4px 4px 0 var(--line); }
+  .card .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .card .name { font-size: 22px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .meta { font-family: var(--data); font-size: 12px; white-space: nowrap; }
+  .card .hpnum { font-family: var(--data); font-size: 12px; text-align: right; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .chip { font-family: var(--data); font-size: 10px; font-weight: 600; color: #fff; padding: 2px 7px; border-radius: 2px; letter-spacing: .06em; text-transform: uppercase; }
+  #foeCard { top: 16px; left: 16px; }
+  #allyCard { right: 16px; bottom: 176px; }
+  #panel { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr minmax(0, 400px); gap: 10px; padding: 12px; pointer-events: auto; }
+  #msg { background: var(--paper); border: 3px solid var(--line); border-radius: 6px; padding: 14px 18px; font-size: 19px; min-height: 140px; box-shadow: 4px 4px 0 var(--line); }
+  #menu { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: stretch; }
+  #menu button { background: var(--paper); border: 3px solid var(--line); border-radius: 6px; font-size: 17px; font-weight: 600; padding: 10px; box-shadow: 3px 3px 0 var(--line); text-align: left; }
+  #menu button small { display: block; font-family: var(--data); font-size: 11px; font-weight: 400; color: var(--muted); }
+  #menu button:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--line); }
+  #menu button:disabled { opacity: .4; cursor: default; }
+  @media (max-width: 640px) {
+    #panel { grid-template-columns: 1fr; }
+    #msg { min-height: 72px; font-size: 16px; }
+    #allyCard { bottom: 300px; }
+  }
+
+  #start { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(22,24,29,.55); padding: 16px; overflow-y: auto; }
+  #start .box { background: var(--paper); border: 3px solid var(--line); border-radius: 8px; padding: 24px; max-width: 760px; width: 100%; box-shadow: 6px 6px 0 var(--line); }
+  #start h1 { margin: 0; font-size: clamp(34px, 6vw, 52px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  #start h1 .a { color: #2f7fd0; } #start h1 .b { color: #b5473a; }
+  #start p { margin: 8px 0 18px; color: var(--muted); }
+  #starters { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  #starters button { background: #fff; border: 3px solid var(--line); border-radius: 6px; padding: 14px; text-align: left; box-shadow: 3px 3px 0 var(--line); display: grid; gap: 4px; }
+  #starters button:hover { transform: translate(-1px, -1px); }
+  #starters .glyph { font-size: 56px; line-height: 1.1; }
+  #starters b { font-size: 18px; }
+  #starters span { font-family: var(--data); font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div id="loading">Setting type…</div>
+<div id="hud"></div>
+<div id="help" class="mini hidden">
+  <b>Font Fight 3D</b><br>
+  Move with WASD or the arrow keys. Wild fonts roam the tall grass. Walk into one to battle it, and open your Type Case to catch it. Dip in the Ink Well to heal.
+  <br><button id="reset" type="button">New game</button>
+</div>
+<div id="toast" class="mini" style="opacity:0"></div>
+<div id="pad" class="hidden" aria-label="Movement">
+  <span></span><button data-k="up" aria-label="Up">▲</button><span></span>
+  <button data-k="left" aria-label="Left">◀</button><span></span><button data-k="right" aria-label="Right">▶</button>
+  <span></span><button data-k="down" aria-label="Down">▼</button><span></span>
+</div>
+
+<div id="battle" class="hidden">
+  <div class="card" id="foeCard"></div>
+  <div class="card" id="allyCard"></div>
+  <div id="panel">
+    <div id="msg" aria-live="polite"></div>
+    <div id="menu"></div>
+  </div>
+</div>
+
+<div id="start" class="hidden">
+  <div class="box">
+    <h1><span class="a">Font</span> <span class="b">Fight</span> 3D</h1>
+    <p>Pick your first typeface. Its stats come from its real metrics: ink coverage, x-height, cap height and width.</p>
+    <div id="starters"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ================= DATA ================= */
+const ROSTER = {
+  playfair:   { name: "Playfair Display", cls: "Serif" },
+  merri:      { name: "Merriweather",     cls: "Serif" },
+  fraunces:   { name: "Fraunces",         cls: "Serif" },
+  inter:      { name: "Inter",            cls: "Sans" },
+  oswald:     { name: "Oswald",           cls: "Sans" },
+  worksans:   { name: "Work Sans",        cls: "Sans" },
+  jetbrains:  { name: "JetBrains Mono",   cls: "Mono" },
+  spacemono:  { name: "Space Mono",       cls: "Mono" },
+  bebas:      { name: "Bebas Neue",       cls: "Display" },
+  abril:      { name: "Abril Fatface",    cls: "Display" },
+  pacifico:   { name: "Pacifico",         cls: "Script" },
+  caveat:     { name: "Caveat",           cls: "Script" },
+};
+const STARTERS = ["inter", "playfair", "jetbrains"];
+const CLASSES = ["Serif", "Display", "Script", "Sans", "Mono"]; // each beats the next two in this ring
+const CLASS_COLOR = { Normal: "#7b7f88", Serif: "#b5473a", Sans: "#2f7fd0", Mono: "#3f9d48", Display: "#d4950f", Script: "#8571cf" };
+const REASONS = {
+  "Serif>Display": "body text outlasts any headline", "Serif>Script": "tradition tames the flourish",
+  "Display>Script": "loud beats pretty", "Display>Sans": "a poster drowns out a UI label",
+  "Script>Sans": "personality beats neutral", "Script>Mono": "charm breaks the grid",
+  "Sans>Mono": "proportional spacing wins the line", "Sans>Serif": "modernism cut the brackets off",
+  "Mono>Serif": "code doesn't care about tradition", "Mono>Display": "precision beats hype",
+};
+const eff = (a, d) => { if (a === "Normal") return 1; const k = (CLASSES.indexOf(d) - CLASSES.indexOf(a) + 5) % 5; return k === 0 ? 1 : k <= 2 ? 1.5 : 0.67; };
+const MOVES = {
+  Normal:  [{ name: "Kern Crunch", type: "Normal", power: 40, acc: 100 }],
+  Serif:   [{ name: "Bracket Strike", type: "Serif", power: 55, acc: 100 }, { name: "Old-Style Onslaught", type: "Serif", power: 85, acc: 80 }],
+  Sans:    [{ name: "Grotesk Grind", type: "Sans", power: 55, acc: 100 }, { name: "Neo-Grotesk Nova", type: "Sans", power: 85, acc: 80 }],
+  Mono:    [{ name: "Fixed-Width Fist", type: "Mono", power: 55, acc: 100 }, { name: "Tab Stop Tsunami", type: "Mono", power: 85, acc: 80 }],
+  Display: [{ name: "Headline Hammer", type: "Display", power: 55, acc: 100 }, { name: "Billboard Blast", type: "Display", power: 85, acc: 80 }],
+  Script:  [{ name: "Swash Lash", type: "Script", power: 55, acc: 100 }, { name: "Ligature Lasso", type: "Script", power: 85, acc: 80 }],
+};
+const BIG_MOVE_LEVEL = 7, MAX_PARTY = 6;
+const F = k => ROSTER[k];
+
+/* Real metrics → base stats (40–100 across the roster) */
+function measureRoster() {
+  const c = document.createElement("canvas"); c.width = 1600; c.height = 220;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  const word = "Hamburgefonstiv", abc = "abcdefghijklmnopqrstuvwxyz", list = Object.values(ROSTER);
+  for (const f of list) {
+    ctx.font = `100px "${f.name}"`;
+    const m = t => ctx.measureText(t);
+    f.xh = m("x").actualBoundingBoxAscent / 100; f.cap = m("H").actualBoundingBoxAscent / 100; f.avgW = m(abc).width / 26 / 100;
+    let kern = 0; if ("fontKerning" in ctx) { ctx.fontKerning = "normal"; kern = (m("A").width + m("V").width - m("AV").width) / 100; }
+    f.kern = Math.max(0, kern);
+    ctx.clearRect(0, 0, c.width, c.height); ctx.fillStyle = "#000"; ctx.fillText(word, 10, 160);
+    const px = ctx.getImageData(0, 0, c.width, c.height).data; let n = 0;
+    for (let i = 3; i < px.length; i += 4) if (px[i] > 127) n++;
+    f.ink = n / (m(word).width * 100);
+  }
+  const scale = (key, get) => { const v = list.map(get), lo = Math.min(...v), hi = Math.max(...v); list.forEach((f, i) => f[key] = Math.round(40 + 60 * (hi === lo ? .5 : (v[i] - lo) / (hi - lo)))); };
+  scale("HP", f => f.ink); scale("ATK", f => f.xh); scale("DEF", f => f.cap); scale("SPD", f => 1 / f.avgW + 3 * f.kern);
+}
+const stats = c => {
+  const f = F(c.sp), L = c.lvl;
+  return { hp: Math.floor(f.HP * 2 * L / 50) + L + 10, atk: Math.floor(f.ATK * 2 * L / 50) + 5, def: Math.floor(f.DEF * 2 * L / 50) + 5, spd: Math.floor(f.SPD * 2 * L / 50) + 5 };
+};
+const xpNeed = L => L * 10;
+const movesOf = c => { const m = MOVES[F(c.sp).cls]; return [MOVES.Normal[0], m[0]].concat(c.lvl >= BIG_MOVE_LEVEL ? [m[1]] : []); };
+const makeMon = (sp, lvl) => { const c = { sp, lvl, xp: 0, hp: 0 }; c.hp = stats(c).hp; return c; };
+
+/* ================= SAVE ================= */
+let party = [];
+const SAVE_KEY = "fontfight3d-save";
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(party)); } catch {} }
+function load() {
+  try { const p = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); if (Array.isArray(p) && p.length && p.every(c => ROSTER[c.sp] && Number.isFinite(c.lvl))) return p; } catch {}
+  return null;
+}
+
+/* ================= THREE SETUP ================= */
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const SKY = 0xcfe6f2;
+scene.background = new THREE.Color(SKY); scene.fog = new THREE.Fog(SKY, 45, 120);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6d7f55, 0.8));
+const sun = new THREE.DirectionalLight(0xfff1d6, 0.8);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 120 });
+scene.add(sun, sun.target);
+addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, flatShading: true, ...extra });
+const mesh = (geo, m, shadow = true) => { const o = new THREE.Mesh(geo, m); o.castShadow = shadow; o.receiveShadow = true; return o; };
+
+/* glyph textures drawn with the real web font */
+const texCache = {};
+function glyphTexture(fontName, text, bg, fg, size = 512) {
+  const key = fontName + text + bg + fg;
+  if (texCache[key]) return texCache[key];
+  const c = document.createElement("canvas"); c.width = c.height = size;
+  const x = c.getContext("2d");
+  if (bg) { x.fillStyle = bg; x.fillRect(0, 0, size, size); }
+  x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "alphabetic";
+  let px = size * 0.62; x.font = `${px}px "${fontName}"`;
+  let m = x.measureText(text);
+  const w = m.width; if (w > size * 0.86) { px *= size * 0.86 / w; x.font = `${px}px "${fontName}"`; m = x.measureText(text); }
+  const h = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  x.fillText(text, size / 2, size * 0.58 + (h / 2 - m.actualBoundingBoxDescent) - size * 0.04);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4;
+  return texCache[key] = t;
+}
+
+/* ================= WORLD ================= */
+const WORLD = 68;
+const ground = mesh(new THREE.PlaneGeometry(WORLD * 2 + 60, WORLD * 2 + 60), mat(0x8fb35f), false);
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const obstacles = [];
+const PATCHES = [ { x: -26, z: -18, r: 11 }, { x: 24, z: 22, r: 10 }, { x: -22, z: 30, r: 9 }, { x: 34, z: -32, r: 9 }, { x: -44, z: -46, r: 8 }, { x: 4, z: -46, r: 10 } ];
+const WELL = { x: 0, z: 0 };
+{
+  const geo = new THREE.ConeGeometry(0.28, 1.1, 4);
+  const count = PATCHES.reduce((n, p) => n + Math.round(p.r * p.r * 3.2), 0);
+  const inst = new THREE.InstancedMesh(geo, mat(0x4c7f34), count); inst.castShadow = true;
+  const d = new THREE.Object3D(); let i = 0;
+  for (const p of PATCHES) {
+    const n = Math.round(p.r * p.r * 3.2);
+    for (let k = 0; k < n; k++) {
+      const a = Math.random() * Math.PI * 2, rr = Math.sqrt(Math.random()) * p.r;
+      d.position.set(p.x + Math.cos(a) * rr, 0.5, p.z + Math.sin(a) * rr);
+      d.rotation.set((Math.random() - .5) * .3, Math.random() * 3, (Math.random() - .5) * .3);
+      d.scale.setScalar(0.7 + Math.random() * 0.6); d.updateMatrix(); inst.setMatrixAt(i++, d.matrix);
+    }
+    const disk = mesh(new THREE.CircleGeometry(p.r + 0.6, 28), mat(0x6e9a48), false);
+    disk.rotation.x = -Math.PI / 2; disk.position.set(p.x, 0.02, p.z); scene.add(disk);
+  }
+  scene.add(inst);
+}
+function tree(x, z) {
+  const g = new THREE.Group();
+  const trunk = mesh(new THREE.CylinderGeometry(0.35, 0.5, 2, 6), mat(0x8a5a3b)); trunk.position.y = 1;
+  const c1 = mesh(new THREE.ConeGeometry(2.2, 3.2, 7), mat(0x3a6e3f)); c1.position.y = 3;
+  const c2 = mesh(new THREE.ConeGeometry(1.6, 2.6, 7), mat(0x478450)); c2.position.y = 4.6;
+  g.add(trunk, c1, c2); g.position.set(x, 0, z); const s = 0.8 + Math.random() * 0.6; g.scale.setScalar(s);
+  scene.add(g); obstacles.push({ x, z, r: s });
+}
+const clearOf = (x, z, pad) => Math.hypot(x - WELL.x, z - WELL.z) > 8 + pad && PATCHES.every(p => Math.hypot(x - p.x, z - p.z) > p.r + pad) && obstacles.every(o => Math.hypot(x - o.x, z - o.z) > o.r + 2.5);
+
+/* Ink Well (heals) */
+const inkSurface = mesh(new THREE.CircleGeometry(1.7, 24), mat(0x1b2a6b, { roughness: 0.15, emissive: 0x1b2a6b, emissiveIntensity: 0.4 }), false);
+{
+  const pot = mesh(new THREE.CylinderGeometry(2.2, 2.6, 1.4, 10), mat(0x2a2e38)); pot.position.set(WELL.x, 0.7, WELL.z);
+  const lip = mesh(new THREE.TorusGeometry(2.0, 0.25, 6, 20), mat(0x3a3f4c)); lip.rotation.x = Math.PI / 2; lip.position.set(WELL.x, 1.4, WELL.z);
+  inkSurface.rotation.x = -Math.PI / 2; inkSurface.position.set(WELL.x, 1.35, WELL.z);
+  const quill = new THREE.Group();
+  const shaft = mesh(new THREE.CylinderGeometry(0.05, 0.05, 4, 6), mat(0xf4efe3)); shaft.position.y = 2;
+  const vane = mesh(new THREE.SphereGeometry(0.5, 8, 6), mat(0xf4efe3)); vane.scale.set(0.25, 2.6, 0.9); vane.position.y = 3;
+  quill.add(shaft, vane); quill.position.set(WELL.x + 0.6, 0.6, WELL.z); quill.rotation.z = -0.35;
+  const glow = new THREE.PointLight(0x6f8cff, 0.9, 9); glow.position.set(WELL.x, 2.5, WELL.z);
+  scene.add(pot, lip, inkSurface, quill, glow);
+  obstacles.push({ x: WELL.x, z: WELL.z, r: 2.4 });
+}
+/* Giant letter monuments, set in random roster fonts */
+function monument(x, z, letter, font) {
+  const tex = glyphTexture(font.name, letter, null, "#16181d", 512);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide }));
+  plane.castShadow = true; plane.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: tex, alphaTest: 0.4 });
+  plane.position.set(x, 3.4, z); plane.rotation.y = Math.random() * Math.PI; scene.add(plane);
+  obstacles.push({ x, z, r: 1.2 });
+}
+
+/* ================= FONT CREATURES ================= */
+function buildCreature(key) {
+  const f = F(key), color = CLASS_COLOR[f.cls];
+  const g = new THREE.Group(), body = new THREE.Group();
+  const side = mat(color);
+  const faceTex = glyphTexture(f.name, "Aa", "#fffefa", "#16181d");
+  const face = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.85 });
+  const block = mesh(new THREE.BoxGeometry(1.7, 1.7, 0.7), [side, side, side, side, face, face]);
+  block.position.y = 1.15;
+  body.add(block);
+  const dark = mat(0x16181d), white = mat(0xffffff);
+  for (const sx of [-1, 1]) {
+    const eye = mesh(new THREE.SphereGeometry(0.2, 10, 8), white, false); eye.position.set(sx * 0.38, 2.12, 0.18);
+    const pupil = mesh(new THREE.SphereGeometry(0.1, 8, 6), dark, false); pupil.position.set(sx * 0.38, 2.14, 0.35);
+    const foot = mesh(new THREE.BoxGeometry(0.42, 0.25, 0.6), dark); foot.position.set(sx * 0.45, 0.13, 0.1);
+    const leg = mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.35, 6), dark); leg.position.set(sx * 0.45, 0.4, 0);
+    const arm = mesh(new THREE.SphereGeometry(0.17, 8, 6), side); arm.position.set(sx * 1.0, 1.0, 0.1);
+    body.add(eye, pupil, foot, leg, arm);
+  }
+  // class accessory
+  if (f.cls === "Serif") for (const sx of [-1, 1]) { const s = mesh(new THREE.BoxGeometry(0.6, 0.12, 0.7), side); s.position.set(sx * 0.6, 0.32, 0); body.add(s); }
+  if (f.cls === "Mono") { const cur = mesh(new THREE.BoxGeometry(0.12, 0.7, 0.12), mat(0x3f9d48, { emissive: 0x3f9d48, emissiveIntensity: 0.8 })); cur.position.set(0, 2.5, 0); body.add(cur); g.userData.cursor = cur; }
+  if (f.cls === "Display") { const crown = mesh(new THREE.ConeGeometry(0.45, 0.6, 5), mat(0xf2c14e)); crown.position.set(0, 2.55, 0); body.add(crown); }
+  if (f.cls === "Script") { const tail = mesh(new THREE.TorusGeometry(0.45, 0.08, 6, 16, Math.PI * 1.4), side); tail.position.set(0.9, 0.6, -0.4); tail.rotation.y = Math.PI / 2; body.add(tail); }
+  if (f.cls === "Sans") { const ant = mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 6), dark); ant.position.set(0, 2.3, 0); const tip = mesh(new THREE.SphereGeometry(0.12, 8, 6), side); tip.position.set(0, 2.6, 0); body.add(ant, tip); }
+  g.add(body);
+  Object.assign(g.userData, { body, t: Math.random() * 10, flashMats: [side, face] });
+  return g;
+}
+function animateCreature(g, dt, moving) {
+  const u = g.userData; u.t += dt * (moving ? 9 : 3);
+  u.body.position.y = Math.abs(Math.sin(u.t)) * (moving ? 0.25 : 0.08);
+  u.body.rotation.z = moving ? Math.sin(u.t) * 0.08 : 0;
+  if (u.cursor) u.cursor.visible = Math.floor(performance.now() / 500) % 2 === 0;
+}
+function buildPlayer() {
+  const g = new THREE.Group(), legs = [];
+  for (const sx of [-1, 1]) { const l = mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.8, 6), mat(0x2d3a5a)); l.geometry.translate(0, -0.4, 0); l.position.set(sx * 0.22, 0.85, 0); g.add(l); legs.push(l); }
+  const torso = mesh(new THREE.CylinderGeometry(0.42, 0.48, 0.95, 8), mat(0x2b2f3a)); torso.position.y = 1.3;
+  const apron = mesh(new THREE.BoxGeometry(0.62, 0.8, 0.1), mat(0xe8dcc0)); apron.position.set(0, 1.2, 0.42);
+  const head = mesh(new THREE.SphereGeometry(0.38, 12, 10), mat(0xf1c7a0)); head.position.y = 2.1;
+  const cap = mesh(new THREE.CylinderGeometry(0.38, 0.4, 0.28, 12), mat(0xb5473a)); cap.position.y = 2.38;
+  const pencil = mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.6, 6), mat(0xf2c14e)); pencil.rotation.z = Math.PI / 2; pencil.position.set(0, 2.15, -0.3);
+  g.add(torso, apron, head, cap, pencil);
+  g.userData = { legs, t: 0 };
+  return g;
+}
+const player = buildPlayer(); player.position.set(0, 0, 7); scene.add(player);
+
+/* ================= ROAMERS ================= */
+const roamers = [];
+function randIn(p) { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * (p.r - 1); return new THREE.Vector3(p.x + Math.cos(a) * r, 0, p.z + Math.sin(a) * r); }
+const avgLevel = () => party.length ? party.reduce((s, c) => s + c.lvl, 0) / party.length - 4 : 0;
+function spawnRoamer(r) {
+  const keys = Object.keys(ROSTER), sp = keys[Math.floor(Math.random() * keys.length)];
+  if (r?.model) scene.remove(r.model);
+  const p = PATCHES[Math.floor(Math.random() * PATCHES.length)];
+  const model = buildCreature(sp); model.scale.setScalar(0.75);
+  const lvl = Math.max(2, Math.min(15, Math.round(2 + Math.hypot(p.x, p.z) / 18 + Math.random() * 2 + Math.max(0, avgLevel()) * 0.5)));
+  const o = r || {}; Object.assign(o, { sp, lvl, patch: p, model, target: randIn(p), pause: 0 });
+  model.position.copy(randIn(p)); scene.add(model);
+  return o;
+}
+
+/* ================= INPUT ================= */
+const keys = {};
+const KEYMAP = { ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down", ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right" };
+addEventListener("keydown", e => { if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); } });
+addEventListener("keyup", e => { if (KEYMAP[e.code]) keys[KEYMAP[e.code]] = false; });
+addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
+document.querySelectorAll("#pad button").forEach(b => {
+  const k = b.dataset.k, on = e => { e.preventDefault(); keys[k] = true; }, off = () => keys[k] = false;
+  b.addEventListener("pointerdown", on); ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, off));
+});
+
+/* ================= HUD ================= */
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const hpColor = f => f > 0.5 ? "var(--hp)" : f > 0.2 ? "var(--hp-mid)" : "var(--hp-low)";
+function bar(frac, cls = "") { const b = el("div", "bar " + cls), i = el("i"); i.style.width = Math.max(0, frac) * 100 + "%"; if (!cls) i.style.background = hpColor(frac); b.append(i); return b; }
+const fontName = (key, cls) => { const s = el("span", cls, F(key).name); s.style.fontFamily = `"${F(key).name}", serif`; return s; };
+function renderHud() {
+  const h = $("hud"); h.innerHTML = "";
+  for (const c of party) { const m = el("div", "mini"), row = el("div", "row"); row.append(fontName(c.sp), el("span", null, "Lv " + c.lvl)); m.append(row, bar(c.hp / stats(c).hp)); h.append(m); }
+}
+let toastTimer;
+function toast(t) { const e = $("toast"); e.textContent = t; e.style.opacity = 1; clearTimeout(toastTimer); toastTimer = setTimeout(() => e.style.opacity = 0, 2400); }
+
+/* ================= ANIMATION HELPERS ================= */
+const tween = (ms, fn) => new Promise(res => { const s = performance.now(); const step = now => { const t = Math.min(1, (now - s) / ms); fn(t); t < 1 ? requestAnimationFrame(step) : res(); }; requestAnimationFrame(step); });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function say(text, ms = 1000) { $("msg").textContent = text; await sleep(ms); }
+
+/* ================= BATTLE ARENA: a giant specimen sheet ================= */
+const ARENA = new THREE.Vector3(0, 0, -260);
+{
+  const sheet = mesh(new THREE.BoxGeometry(26, 0.4, 18), mat(0xf6f1e4)); sheet.position.set(ARENA.x, -0.2, ARENA.z); scene.add(sheet);
+  for (let i = -3; i <= 3; i++) { const rule = mesh(new THREE.BoxGeometry(24, 0.02, 0.06), mat(0xd9cfb8), false); rule.position.set(ARENA.x, 0.01, ARENA.z + i * 2.4); scene.add(rule); }
+  for (const [dx, dz] of [[-3.6, 2.4], [3.6, -2.4]]) { const pad = mesh(new THREE.CylinderGeometry(1.9, 2.0, 0.2, 24), mat(0x2b2f3a)); pad.position.set(ARENA.x + dx, 0.1, ARENA.z + dz); scene.add(pad); }
+  const back = mesh(new THREE.BoxGeometry(40, 14, 0.5), mat(0xe9edf2)); back.position.set(ARENA.x, 6, ARENA.z - 14); scene.add(back);
+}
+const ALLY_POS = new THREE.Vector3(ARENA.x - 3.6, 0.2, ARENA.z + 2.4);
+const FOE_POS = new THREE.Vector3(ARENA.x + 3.6, 0.2, ARENA.z - 2.4);
+
+let mode = "loading", battle = null, encounterCooldown = 0;
+function face(model, target) { model.rotation.y = Math.atan2(target.x - model.position.x, target.z - model.position.z); }
+function placeAlly() {
+  if (battle.allyModel) scene.remove(battle.allyModel);
+  const m = buildCreature(party[battle.ally].sp); m.position.copy(ALLY_POS); face(m, FOE_POS); scene.add(m); battle.allyModel = m;
+}
+function renderCards() {
+  const card = (box, c, nums) => {
+    box.innerHTML = "";
+    const s = stats(c), f = F(c.sp), row = el("div", "row"), meta = el("span", "meta");
+    const chip = el("span", "chip", f.cls); chip.style.background = CLASS_COLOR[f.cls];
+    meta.append(chip, document.createTextNode(" Lv " + c.lvl)); row.append(fontName(c.sp, "name"), meta);
+    box.append(row, bar(c.hp / s.hp));
+    if (nums) box.append(el("div", "hpnum", `${Math.max(0, c.hp)} / ${s.hp} HP · ATK ${s.atk} · DEF ${s.def} · SPD ${s.spd}`), bar(c.xp / xpNeed(c.lvl), "xp"));
+  };
+  card($("foeCard"), battle.foe, false); card($("allyCard"), party[battle.ally], true);
+}
+function menu(items) {
+  const m = $("menu"); m.innerHTML = "";
+  for (const it of items) {
+    const b = el("button"); b.type = "button"; b.append(document.createTextNode(it.label));
+    if (it.sub) b.append(el("small", null, it.sub));
+    if (it.color) b.style.borderLeft = `10px solid ${it.color}`;
+    b.disabled = !!it.disabled; b.onclick = it.onClick; m.append(b);
+  }
+}
+const lockMenu = () => $("menu").querySelectorAll("button").forEach(b => b.disabled = true);
+function mainMenu() {
+  menu([
+    { label: "Fight", sub: "Choose a move", onClick: fightMenu },
+    { label: "Type Case", sub: party.length >= MAX_PARTY ? "Your case is full" : "Try to catch it", disabled: party.length >= MAX_PARTY, onClick: () => act({ kind: "catch" }) },
+    { label: "Switch", sub: "Swap typeface", disabled: party.filter(c => c.hp > 0).length < 2, onClick: switchMenu },
+    { label: "Run", sub: "Leave the page", onClick: () => act({ kind: "run" }) },
+  ]);
+  $("msg").textContent = `What will ${F(party[battle.ally].sp).name} do?`;
+}
+function fightMenu() {
+  const ally = party[battle.ally], foeCls = F(battle.foe.sp).cls;
+  const items = movesOf(ally).map(mv => {
+    const e = eff(mv.type, foeCls);
+    return { label: mv.name, sub: `${mv.type} · ${mv.power} power · ${mv.acc}%` + (e > 1 ? " · strong" : e < 1 ? " · weak" : ""), color: CLASS_COLOR[mv.type], onClick: () => act({ kind: "move", move: mv }) };
+  });
+  if (ally.lvl < BIG_MOVE_LEVEL) items.push({ label: "Locked", sub: `Big move at Lv ${BIG_MOVE_LEVEL}`, disabled: true });
+  items.push({ label: "Back", onClick: mainMenu });
+  menu(items);
+}
+function switchMenu() {
+  const items = party.map((c, i) => ({ label: `${F(c.sp).name} Lv ${c.lvl}`, sub: `${Math.max(0, c.hp)}/${stats(c).hp} HP`, disabled: i === battle.ally || c.hp <= 0, onClick: () => act({ kind: "switch", to: i }) }));
+  items.push({ label: "Back", onClick: mainMenu });
+  menu(items);
+}
+async function flash(model) { const ms = model.userData.flashMats; for (let i = 0; i < 3; i++) { ms.forEach(m => m.emissive.setHex(0x888888)); await sleep(70); ms.forEach(m => m.emissive.setHex(0)); await sleep(70); } }
+async function burst(at, color) {
+  // a puff of flying letters in the move's class color
+  const letters = [];
+  for (let i = 0; i < 7; i++) {
+    const s = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.35, 0.08), new THREE.MeshBasicMaterial({ color, transparent: true }));
+    s.position.copy(at).y += 1.2; s.userData.v = new THREE.Vector3((Math.random() - .5) * 4, Math.random() * 3 + 1, (Math.random() - .5) * 4);
+    scene.add(s); letters.push(s);
+  }
+  await tween(420, t => letters.forEach(s => { s.position.addScaledVector(s.userData.v, 0.016); s.rotation.x += 0.2; s.rotation.y += 0.25; s.material.opacity = 1 - t; }));
+  letters.forEach(s => scene.remove(s));
+}
+async function lunge(model, toward) {
+  const start = model.position.clone(), dir = toward.clone().sub(start).setY(0).normalize().multiplyScalar(1.4);
+  await tween(160, t => model.position.copy(start).addScaledVector(dir, t));
+  await tween(200, t => model.position.copy(start).addScaledVector(dir, 1 - t));
+}
+async function doMove(side, mv) {
+  const atk = side === "ally" ? party[battle.ally] : battle.foe, def = side === "ally" ? battle.foe : party[battle.ally];
+  const aModel = side === "ally" ? battle.allyModel : battle.foeModel, dModel = side === "ally" ? battle.foeModel : battle.allyModel;
+  await say(`${side === "ally" ? "" : "Wild "}${F(atk.sp).name} used ${mv.name}!`, 450);
+  await lunge(aModel, dModel.position);
+  if (Math.random() * 100 >= mv.acc) { await say("It missed!", 800); return; }
+  const as = stats(atk), ds = stats(def), aCls = F(atk.sp).cls, dCls = F(def.sp).cls, e = eff(mv.type, dCls), stab = mv.type === aCls ? 1.5 : 1;
+  const dmg = Math.max(1, Math.floor(((2 * atk.lvl / 5 + 2) * mv.power * as.atk / ds.def / 50 + 2) * stab * e * (0.85 + Math.random() * 0.15)));
+  burst(dModel.position, CLASS_COLOR[mv.type]); await flash(dModel);
+  def.hp = Math.max(0, def.hp - dmg); renderCards(); renderHud();
+  if (e > 1) await say(`Strong hit! ${mv.type} beats ${dCls}: ${REASONS[mv.type + ">" + dCls]}.`, 1300);
+  else if (e < 1) await say(`It barely worked. ${dCls} beats ${mv.type}: ${REASONS[dCls + ">" + mv.type]}.`, 1300);
+}
+async function faint(model) { await tween(400, t => { model.rotation.x = -t * Math.PI / 2; model.position.y = 0.2 - t * 0.3; }); await sleep(200); scene.remove(model); }
+async function gainXp(amount) {
+  const c = party[battle.ally];
+  await say(`${F(c.sp).name} gained ${amount} XP.`, 900);
+  c.xp += amount;
+  while (c.xp >= xpNeed(c.lvl)) {
+    const before = stats(c).hp; c.xp -= xpNeed(c.lvl); c.lvl++; c.hp += stats(c).hp - before; renderCards(); renderHud();
+    await say(`${F(c.sp).name} grew to Lv ${c.lvl}!`, 1100);
+    if (c.lvl === BIG_MOVE_LEVEL) await say(`${F(c.sp).name} learned ${MOVES[F(c.sp).cls][1].name}!`, 1200);
+  }
+  renderCards();
+}
+async function afterHit() {
+  if (battle.foe.hp <= 0) { await faint(battle.foeModel); await say(`Wild ${F(battle.foe.sp).name} fell over!`, 900); await gainXp(battle.foe.lvl * 7); endBattle(); return true; }
+  const ally = party[battle.ally];
+  if (ally.hp <= 0) {
+    await faint(battle.allyModel); battle.allyModel = null; await say(`${F(ally.sp).name} fell over!`, 900);
+    const next = party.findIndex(c => c.hp > 0);
+    if (next < 0) { await say("Your whole case is out of ink. You hurry back to the Ink Well.", 1600); healAll(); player.position.set(0, 0, 7); endBattle(); return true; }
+    battle.ally = next; placeAlly(); renderCards(); await say(`Go, ${F(party[next].sp).name}!`, 900);
+  }
+  return false;
+}
+async function openCase() {
+  const foe = battle.foe, fm = battle.foeModel;
+  const box = new THREE.Group();
+  const base = mesh(new THREE.BoxGeometry(1.2, 0.35, 0.9), mat(0x8a5a3b)), lid = mesh(new THREE.BoxGeometry(1.2, 0.1, 0.9), mat(0xa06b47));
+  lid.position.y = 0.22; box.add(base, lid);
+  const a = ALLY_POS.clone().setY(1.5), b = fm.position.clone().setY(0.4);
+  scene.add(box); await say("You opened your Type Case!", 200);
+  await tween(550, t => { box.position.lerpVectors(a, b, t); box.position.y += Math.sin(t * Math.PI) * 3; box.rotation.y = t * 6; });
+  await tween(300, t => { fm.scale.setScalar(1 - t); fm.position.y = 0.2 + t * 0.3; });
+  const chance = Math.min(0.95, 0.15 + 0.75 * (1 - foe.hp / stats(foe).hp) + (foe.lvl < party[battle.ally].lvl ? 0.1 : 0));
+  let shakes = 0;
+  for (; shakes < 3; shakes++) { if (Math.random() > Math.pow(chance, 1 / 3)) break; await tween(380, t => box.rotation.z = Math.sin(t * Math.PI * 2) * 0.4); await sleep(200); }
+  if (shakes === 3) {
+    await say(`Set! ${F(foe.sp).name} is now in your Type Case.`, 1400);
+    scene.remove(box); scene.remove(fm); party.push(foe); renderHud(); endBattle(); return true;
+  }
+  scene.remove(box); fm.position.y = 0.2; await tween(250, t => fm.scale.setScalar(t));
+  await say(shakes ? "So close! It slipped out of the case." : "It jumped right back out!", 900);
+  return false;
+}
+async function act(action) {
+  lockMenu();
+  const ally = party[battle.ally], foe = battle.foe;
+  const foeMove = () => { const ms = movesOf(foe); return ms[Math.floor(Math.random() * ms.length)]; };
+  if (action.kind === "move") {
+    const order = stats(ally).spd >= stats(foe).spd ? [["ally", action.move], ["foe", foeMove()]] : [["foe", foeMove()], ["ally", action.move]];
+    for (const [side, mv] of order) { await doMove(side, mv); if (await afterHit()) return; }
+  } else if (action.kind === "catch") {
+    if (await openCase()) return;
+    await doMove("foe", foeMove()); if (await afterHit()) return;
+  } else if (action.kind === "switch") {
+    await say(`Come back, ${F(ally.sp).name}!`, 600); battle.ally = action.to; placeAlly(); renderCards();
+    await say(`Go, ${F(party[action.to].sp).name}!`, 700);
+    await doMove("foe", foeMove()); if (await afterHit()) return;
+  } else if (action.kind === "run") {
+    battle.runs++;
+    if (Math.random() < 0.5 + 0.15 * battle.runs + (stats(ally).spd - stats(foe).spd) / 100) { await say("You got away safely.", 900); endBattle(true); return; }
+    await say("Couldn't get away!", 800); await doMove("foe", foeMove()); if (await afterHit()) return;
+  }
+  mainMenu();
+}
+function setWorldUi(on) { ["help", "hud", "pad"].forEach(id => $(id).classList.toggle("hidden", !on)); $("battle").classList.toggle("hidden", on); }
+function startBattle(roamer) {
+  mode = "battle"; roamer.model.visible = false;
+  const foe = makeMon(roamer.sp, roamer.lvl);
+  battle = { roamer, foe, ally: Math.max(0, party.findIndex(c => c.hp > 0)), runs: 0 };
+  const fm = buildCreature(foe.sp); fm.position.copy(FOE_POS); face(fm, ALLY_POS); scene.add(fm); battle.foeModel = fm;
+  placeAlly();
+  camera.position.set(ARENA.x - 8, 5, ARENA.z + 11); camera.lookAt(ARENA.x + 0.8, 1.3, ARENA.z);
+  sun.position.set(ARENA.x + 10, 25, ARENA.z + 15); sun.target.position.copy(ARENA);
+  setWorldUi(false); renderCards(); lockMenu();
+  say(`A wild ${F(foe.sp).name} (${F(foe.sp).cls}, Lv ${foe.lvl}) appeared!`, 1200).then(mainMenu);
+}
+function endBattle(fled) {
+  if (battle.foeModel) scene.remove(battle.foeModel);
+  if (battle.allyModel) scene.remove(battle.allyModel);
+  spawnRoamer(battle.roamer);
+  battle = null; mode = "world"; encounterCooldown = fled ? 2.5 : 1.2;
+  setWorldUi(true); renderHud(); save();
+}
+function healAll() { party.forEach(c => c.hp = stats(c).hp); renderHud(); save(); }
+
+/* ================= LOOP ================= */
+const clock = new THREE.Clock(), camOffset = new THREE.Vector3(0, 10, 13);
+function update(dt) {
+  inkSurface.material.emissiveIntensity = 0.35 + Math.sin(performance.now() / 400) * 0.15;
+  if (mode === "battle") { if (battle?.allyModel) animateCreature(battle.allyModel, dt, false); if (battle?.foeModel) animateCreature(battle.foeModel, dt, false); return; }
+  if (mode !== "world") return;
+  let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dz = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+  const moving = !!(dx || dz), u = player.userData;
+  if (moving) {
+    const len = Math.hypot(dx, dz); dx /= len; dz /= len;
+    const p = player.position; p.x += dx * 9 * dt; p.z += dz * 9 * dt;
+    for (const o of obstacles) { const ox = p.x - o.x, oz = p.z - o.z, d = Math.hypot(ox, oz), min = o.r + 0.6; if (d < min && d > 0) { p.x = o.x + ox / d * min; p.z = o.z + oz / d * min; } }
+    p.x = Math.max(-WORLD, Math.min(WORLD, p.x)); p.z = Math.max(-WORLD, Math.min(WORLD, p.z));
+    let diff = Math.atan2(dx, dz) - player.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff)); player.rotation.y += diff * Math.min(1, dt * 12);
+    u.t += dt * 12;
+  } else u.t *= 0.8;
+  u.legs[0].rotation.x = Math.sin(u.t) * 0.6; u.legs[1].rotation.x = -Math.sin(u.t) * 0.6;
+  player.position.y = moving ? Math.abs(Math.sin(u.t)) * 0.08 : 0;
+  for (const r of roamers) {
+    const m = r.model; let walking = false;
+    if (r.pause > 0) r.pause -= dt;
+    else { const to = r.target.clone().sub(m.position).setY(0), d = to.length();
+      if (d < 0.3) { r.target = randIn(r.patch); r.pause = 0.5 + Math.random() * 2; }
+      else { to.normalize(); m.position.addScaledVector(to, 2.4 * dt); m.rotation.y = Math.atan2(to.x, to.z); walking = true; } }
+    animateCreature(m, dt, walking);
+  }
+  encounterCooldown -= dt;
+  if (encounterCooldown <= 0) { const hit = roamers.find(r => r.model.visible && r.model.position.distanceTo(player.position) < 1.8); if (hit) { startBattle(hit); return; } }
+  if (Math.hypot(player.position.x - WELL.x, player.position.z - WELL.z) < 3.4 && party.some(c => c.hp < stats(c).hp)) { healAll(); toast("Fresh ink! Your whole Type Case is healed."); }
+  camera.position.lerp(player.position.clone().add(camOffset), Math.min(1, dt * 5)); camera.lookAt(player.position.x, 1, player.position.z);
+  sun.position.set(player.position.x + 15, 30, player.position.z + 20); sun.target.position.copy(player.position);
+}
+function loop() { update(Math.min(0.05, clock.getDelta())); renderer.render(scene, camera); requestAnimationFrame(loop); }
+
+/* ================= BOOT ================= */
+function begin() {
+  mode = "world"; $("start").classList.add("hidden"); setWorldUi(true);
+  if (!roamers.length) for (let i = 0; i < 12; i++) roamers.push(spawnRoamer());
+  camera.position.copy(player.position).add(camOffset); renderHud(); save();
+}
+function showStarters() {
+  mode = "start"; $("start").classList.remove("hidden");
+  const box = $("starters"); box.innerHTML = "";
+  for (const k of STARTERS) {
+    const f = F(k), b = el("button"); b.type = "button";
+    const g = el("div", "glyph", "Aa"); g.style.fontFamily = `"${f.name}", serif`; g.style.color = CLASS_COLOR[f.cls];
+    b.append(g, el("b", null, f.name), el("span", null, `${f.cls} · HP ${f.HP} · ATK ${f.ATK} · DEF ${f.DEF} · SPD ${f.SPD}`));
+    b.onclick = () => { party = [makeMon(k, 5)]; begin(); toast(`${f.name} is your partner. Wild fonts are in the tall grass!`); };
+    box.append(b);
+  }
+}
+let resetArmed = false;
+$("reset").onclick = () => {
+  if (!resetArmed) { resetArmed = true; $("reset").textContent = "Click again to erase your save"; setTimeout(() => { resetArmed = false; $("reset").textContent = "New game"; }, 3000); return; }
+  try { localStorage.removeItem(SAVE_KEY); } catch {}
+  location.reload();
+};
+
+Promise.race([
+  Promise.all(Object.values(ROSTER).map(f => document.fonts.load(`100px "${f.name}"`, "AaHamburgefonstivVxH"))),
+  new Promise(r => setTimeout(r, 5000)),
+]).catch(() => {}).then(() => {
+  measureRoster();
+  // world props that need fonts
+  for (let n = 0; n < 60;) { const x = (Math.random() * 2 - 1) * WORLD, z = (Math.random() * 2 - 1) * WORLD; if (clearOf(x, z, 2)) { tree(x, z); n++; } }
+  for (let a = 0; a < Math.PI * 2; a += 0.16) tree(Math.cos(a) * (WORLD + 6), Math.sin(a) * (WORLD + 6));
+  const fonts = Object.values(ROSTER), letters = "AgRQ&ef?";
+  for (let n = 0; n < letters.length;) { const x = (Math.random() * 2 - 1) * (WORLD - 6), z = (Math.random() * 2 - 1) * (WORLD - 6); if (clearOf(x, z, 3)) { monument(x, z, letters[n], fonts[(n * 5) % fonts.length]); n++; } }
+  $("loading").classList.add("hidden");
+  const saved = load();
+  if (saved) { party = saved; begin(); toast("Welcome back!"); }
+  else { camera.position.set(0, 10, 20); camera.lookAt(0, 1, 0); showStarters(); }
+  loop();
+});
+</script>
+</body>
+</html>

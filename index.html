@@ -1,0 +1,438 @@
+<title>Font Fight</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Caveat&family=Fraunces&family=Inter&family=JetBrains+Mono:wght@400;600&family=Merriweather&family=Oswald&family=Pacifico&family=Playfair+Display&family=Space+Mono&family=Work+Sans&display=swap">
+<style>
+/* Layout: a printer's proof sheet. Two fighters sit on separate ink plates (cyan vs magenta) with a registration mark between them. */
+:root {
+  --paper: #ffffff;
+  --ink: #111318;
+  --muted: #5b6370;
+  --rule: #d8dce2;
+  --wash: #f3f5f8;
+  --cyan: #0083b8;
+  --magenta: #c8005f;
+  --warn: #b87800;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --data: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1115; --ink: #eceef2; --muted: #9aa2ae; --rule: #2a2f38; --wash: #171a20;
+    --cyan: #3cc2f0; --magenta: #ff5ca6; --warn: #f2b632; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1115; --ink: #eceef2; --muted: #9aa2ae; --rule: #2a2f38; --wash: #171a20;
+  --cyan: #3cc2f0; --magenta: #ff5ca6; --warn: #f2b632; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 28px; }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.4rem, 7vw, 4.2rem); line-height: .9; letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+h1 .a { color: var(--cyan); } h1 .b { color: var(--magenta); }
+.lede { margin: 0; max-width: 42ch; color: var(--muted); }
+h2 { font-family: var(--display); font-weight: 700; font-size: 1.35rem; margin: 0 0 10px; letter-spacing: -0.01em; }
+.label { font-family: var(--data); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+
+.picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.picker label { display: grid; gap: 4px; flex: 1 1 180px; }
+select, button { font: inherit; color: var(--ink); }
+select { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; }
+button { cursor: pointer; background: var(--paper); border: 1.5px solid var(--ink); border-radius: 6px; padding: 8px 14px; font-weight: 600; }
+button:hover:not(:disabled) { background: var(--wash); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.primary { background: var(--ink); color: var(--paper); }
+.primary:hover:not(:disabled) { background: var(--ink); opacity: .88; }
+
+.arena { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: stretch; }
+.vs { display: grid; place-items: center; align-content: center; gap: 6px; }
+.vs svg { width: 44px; height: 44px; color: var(--ink); }
+.vs span { font-family: var(--data); font-weight: 600; font-size: 13px; }
+.fighter { --acc: var(--cyan); border: 1.5px solid var(--rule); border-top: 6px solid var(--acc); border-radius: 4px; padding: 16px; display: grid; gap: 12px; min-width: 0; background: var(--paper); }
+.fighter.right { --acc: var(--magenta); }
+.top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.chip { font-family: var(--data); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--acc); color: var(--acc); padding: 2px 8px; border-radius: 99px; }
+.side { font-family: var(--data); font-size: 11px; color: var(--muted); }
+.specimen { font-size: clamp(4.5rem, 13vw, 7.5rem); line-height: 1.05; text-align: center; color: var(--acc); padding-block: 6px; transition: transform .25s; overflow: hidden; white-space: nowrap; }
+.fname { font-family: var(--display); font-weight: 700; font-size: 1.25rem; text-align: center; margin: -6px 0 0; }
+.hp { display: grid; gap: 4px; }
+.hpbar { height: 12px; border: 1.5px solid var(--ink); border-radius: 3px; overflow: hidden; background: var(--wash); }
+.hpbar i { display: block; height: 100%; background: var(--acc); width: 100%; transition: width .45s ease-out; }
+.hpbar i.low { background: var(--warn); }
+.hpnum { font-family: var(--data); font-size: 12px; display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.stats { display: grid; gap: 7px; margin: 0; }
+.stat { display: grid; grid-template-columns: 34px 1fr 30px; gap: 8px; align-items: center; font-family: var(--data); font-size: 12px; font-variant-numeric: tabular-nums; }
+.stat dt { font-weight: 600; } .stat dd { margin: 0; text-align: right; }
+.meter { height: 6px; background: var(--wash); border-radius: 3px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--ink); }
+.raw { grid-column: 2 / 4; color: var(--muted); font-size: 11px; margin-top: -4px; }
+
+.fighter.hit .specimen { animation: shake .4s; }
+.fighter.lunge .specimen { transform: translateX(var(--dir, 18px)) scale(1.06); }
+.fighter.right { --dir: -18px; }
+.fighter.ko .specimen { opacity: .25; transform: rotate(-8deg) translateY(10px); }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(3px)} }
+
+.panel { border: 1.5px solid var(--rule); border-radius: 4px; padding: 16px; display: grid; gap: 12px; align-content: start; }
+.crowd .split { display: flex; height: 26px; border: 1.5px solid var(--ink); border-radius: 3px; overflow: hidden; font-family: var(--data); font-size: 12px; font-weight: 600; }
+.split span { display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; transition: flex-basis .4s; color: var(--paper); }
+.split .l { background: var(--cyan); } .split .r { background: var(--magenta); justify-content: flex-end; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.note { color: var(--muted); font-size: 13px; margin: 0; }
+.back.on { border-color: var(--acc); color: var(--acc); box-shadow: inset 0 0 0 1.5px var(--acc); }
+.back.l { --acc: var(--cyan); } .back.r { --acc: var(--magenta); }
+
+.moves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.move { text-align: left; display: grid; gap: 2px; border-color: var(--cyan); }
+.move small { font-family: var(--data); font-weight: 400; font-size: 11px; color: var(--muted); }
+.log { font-family: var(--data); font-size: 13px; background: var(--wash); border-radius: 4px; padding: 12px; min-height: 96px; max-height: 200px; overflow-y: auto; display: grid; gap: 4px; align-content: start; }
+.log p { margin: 0; } .log .eff { color: var(--cyan); font-weight: 600; } .log .weak { color: var(--muted); } .log .end { font-weight: 600; }
+
+.chart { overflow-x: auto; }
+table { border-collapse: collapse; font-family: var(--data); font-size: 12px; min-width: 460px; }
+th, td { border: 1px solid var(--rule); padding: 6px 10px; text-align: center; }
+th { font-weight: 600; background: var(--wash); }
+td.s { color: var(--cyan); font-weight: 600; } td.w { color: var(--muted); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.cols > * { min-width: 0; }
+.how dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 14px; }
+.how dt { font-family: var(--data); font-weight: 600; }
+.how dd { margin: 0; color: var(--muted); }
+
+@media (max-width: 680px) {
+  .arena { grid-template-columns: 1fr; }
+  .vs { grid-auto-flow: column; }
+  .moves { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span class="a">Font</span> <span class="b">Fight</span></h1>
+    <p class="lede">Typefaces battle with stats measured from their real metrics. Back a winner, then fight it out.</p>
+  </header>
+
+  <section class="picker" aria-label="Choose fighters">
+    <label><span class="label">Cyan plate (you)</span><select id="pickA"></select></label>
+    <label><span class="label">Magenta plate (CPU)</span><select id="pickB"></select></label>
+    <button id="random" type="button">Random matchup</button>
+  </section>
+
+  <section class="arena" aria-label="Arena">
+    <article class="fighter left" id="fA"></article>
+    <div class="vs" aria-hidden="true">
+      <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="22" cy="22" r="12"/><circle cx="22" cy="22" r="5"/><path d="M22 2v40M2 22h40"/></svg>
+      <span>VS</span>
+    </div>
+    <article class="fighter right" id="fB"></article>
+  </section>
+
+  <section class="panel crowd" aria-label="Crowd prediction">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">Who wins?</h2>
+      <span class="label" id="voteCount">No votes yet</span>
+    </div>
+    <div class="split" id="split"><span class="l" id="splitL">50%</span><span class="r" id="splitR">50%</span></div>
+    <div class="row">
+      <button type="button" class="back l" id="backA">Back A</button>
+      <button type="button" class="back r" id="backB">Back B</button>
+    </div>
+    <p class="note" id="voteNote">Connecting to the shared vote…</p>
+  </section>
+
+  <section class="panel" aria-label="Battle">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">Battle</h2>
+      <button type="button" class="primary" id="start">Start fight</button>
+    </div>
+    <div class="moves" id="moves"></div>
+    <div class="log" id="log" aria-live="polite"><p>Pick two fonts, back one, then press Start fight. You play the cyan plate.</p></div>
+  </section>
+
+  <section class="cols">
+    <div class="panel how">
+      <h2>How stats are measured</h2>
+      <p class="note">Each font is set at 100px on a hidden canvas in your browser. Raw values are then scaled 40 to 100 across the roster.</p>
+      <dl>
+        <dt>HP</dt><dd>Ink coverage. Share of the box filled by “Hamburgefonstiv”. Heavier type is tougher.</dd>
+        <dt>ATK</dt><dd>x-height in em. Big lowercase hits harder at small sizes.</dd>
+        <dt>DEF</dt><dd>Cap height in em. Tall capitals hold the line.</dd>
+        <dt>SPD</dt><dd>Narrowness (1 ÷ average letter width) plus the kerning on “AV”. Tight type moves first.</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h2>Class chart</h2>
+      <p class="note">Row attacks column. ×1.5 is a strong matchup, ×0.67 a weak one.</p>
+      <div class="chart"><table id="chart"></table></div>
+      <p class="note" id="reasons"></p>
+    </div>
+  </section>
+</div>
+
+<script>
+const ROSTER = [
+  ["Playfair Display","Serif"],["Merriweather","Serif"],["Fraunces","Serif"],
+  ["Inter","Sans"],["Oswald","Sans"],["Work Sans","Sans"],
+  ["JetBrains Mono","Mono"],["Space Mono","Mono"],
+  ["Bebas Neue","Display"],["Abril Fatface","Display"],
+  ["Pacifico","Script"],["Caveat","Script"],
+].map(([name, cls]) => ({ name, cls }));
+const CLASSES = ["Serif","Display","Script","Sans","Mono"]; // each beats the next two in this ring
+const REASONS = {
+  "Serif>Display":"body text outlasts any headline", "Serif>Script":"tradition tames the flourish",
+  "Display>Script":"loud beats pretty", "Display>Sans":"a poster drowns out a UI label",
+  "Script>Sans":"personality beats neutral", "Script>Mono":"charm breaks the grid",
+  "Sans>Mono":"proportional spacing wins the line", "Sans>Serif":"modernism cut the brackets off",
+  "Mono>Serif":"code doesn't care about tradition", "Mono>Display":"precision beats hype",
+};
+const SIG = { Serif:"Bracket Strike", Sans:"Grotesk Grind", Mono:"Fixed-Width Fist", Display:"Headline Hammer", Script:"Swash Lash" };
+const mult = (a, d) => { const k = (CLASSES.indexOf(d) - CLASSES.indexOf(a) + 5) % 5; return k === 0 ? 1 : k <= 2 ? 1.5 : 0.67; };
+const movesFor = f => [
+  { name: SIG[f.cls], power: 60, acc: 100, typed: true, hint: `${f.cls} type · 60 power` },
+  { name: "Kern Crunch", power: 40, acc: 100, typed: false, hint: "No class · 40 power · never misses" },
+  { name: "Weight Shift", power: 0, acc: 100, buff: 1.3, hint: "Raises your ATK ×1.3" },
+  { name: "Leading Leap", power: 95, acc: 65, typed: true, hint: `${f.cls} type · 95 power · 65% hit` },
+];
+const $ = id => document.getElementById(id);
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms, 150) : ms));
+
+/* ---------- measuring ---------- */
+function measure() {
+  const c = document.createElement("canvas"); c.width = 1600; c.height = 220;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  const word = "Hamburgefonstiv", abc = "abcdefghijklmnopqrstuvwxyz";
+  for (const f of ROSTER) {
+    ctx.font = `100px "${f.name}"`;
+    const m = t => ctx.measureText(t);
+    f.xh = m("x").actualBoundingBoxAscent / 100;
+    f.cap = m("H").actualBoundingBoxAscent / 100;
+    f.avgW = m(abc).width / 26 / 100;
+    let kern = 0;
+    if ("fontKerning" in ctx) { ctx.fontKerning = "normal"; kern = (m("A").width + m("V").width - m("AV").width) / 100; }
+    f.kern = Math.max(0, kern);
+    ctx.clearRect(0, 0, c.width, c.height); ctx.fillStyle = "#000"; ctx.fillText(word, 10, 160);
+    const px = ctx.getImageData(0, 0, c.width, c.height).data;
+    let n = 0; for (let i = 3; i < px.length; i += 4) if (px[i] > 127) n++;
+    f.ink = n / (m(word).width * 100);
+  }
+  const scale = (key, get) => {
+    const v = ROSTER.map(get), lo = Math.min(...v), hi = Math.max(...v);
+    ROSTER.forEach((f, i) => f[key] = Math.round(40 + 60 * (hi === lo ? .5 : (v[i] - lo) / (hi - lo))));
+  };
+  scale("HP", f => f.ink); scale("ATK", f => f.xh); scale("DEF", f => f.cap); scale("SPD", f => 1 / f.avgW + 3 * f.kern);
+  ROSTER.forEach(f => f.maxHp = Math.round(60 + f.HP * 0.6));
+}
+
+/* ---------- rendering ---------- */
+let A, B, battle = null;
+function card(el, f, side) {
+  el.innerHTML = "";
+  const h = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const top = h("div", "top"); top.append(h("span", "chip", f.cls), h("span", "side", side));
+  const spec = h("div", "specimen", "Aa"); spec.style.fontFamily = `"${f.name}", serif`;
+  const hp = h("div", "hp"); const bar = h("div", "hpbar"); const fill = h("i"); bar.append(fill);
+  const num = h("div", "hpnum"); num.append(h("span", null, "Health"),h("span", "hpv", `${f.maxHp} / ${f.maxHp}`));
+  hp.append(bar, num);
+  const dl = h("dl", "stats");
+  const raw = { HP: `ink ${(f.ink * 100).toFixed(1)}%`, ATK: `x-height ${f.xh.toFixed(3)} em`, DEF: `cap height ${f.cap.toFixed(3)} em`, SPD: `width ${f.avgW.toFixed(3)} em · AV kern ${f.kern.toFixed(3)} em` };
+  for (const k of ["HP","ATK","DEF","SPD"]) {
+    const row = h("div", "stat"); const meter = h("div", "meter"); const i = h("i"); i.style.width = f[k] + "%"; meter.append(i);
+    row.append(h("dt", null, k), meter, h("dd", null, f[k]), h("span", "raw", raw[k])); dl.append(row);
+  }
+  el.append(top, spec, h("p", "fname", f.name), hp, dl);
+  el.classList.remove("ko", "hit", "lunge");
+  el._fill = fill; el._num = num.querySelector(".hpv");
+}
+function setHp(el, f, hp) {
+  const pct = Math.max(0, hp) / f.maxHp * 100;
+  el._fill.style.width = pct + "%"; el._fill.classList.toggle("low", pct < 30);
+  el._num.textContent = `${Math.max(0, hp)} / ${f.maxHp}`;
+}
+function fillPickers() {
+  for (const sel of [$("pickA"), $("pickB")]) {
+    sel.innerHTML = "";
+    for (const cls of CLASSES) {
+      const g = document.createElement("optgroup"); g.label = cls;
+      ROSTER.filter(f => f.cls === cls).forEach(f => { const o = new Option(f.name, f.name); g.append(o); });
+      sel.append(g);
+    }
+  }
+}
+function setMatch(a, b) {
+  A = ROSTER.find(f => f.name === a); B = ROSTER.find(f => f.name === b);
+  $("pickA").value = A.name; $("pickB").value = B.name;
+  card($("fA"), A, "You"); card($("fB"), B, "CPU");
+  $("backA").textContent = `Back ${A.name}`; $("backB").textContent = `Back ${B.name}`;
+  $("moves").innerHTML = ""; battle = null; $("start").textContent = "Start fight";
+  const m = mult(A.cls, B.cls);
+  log([`${A.name} (${A.cls}) vs ${B.name} (${B.cls}).` + (m === 1 ? " Even class matchup." : m > 1 ? ` ${A.cls} has the edge: ${REASONS[A.cls + ">" + B.cls]}.` : ` ${B.cls} has the edge: ${REASONS[B.cls + ">" + A.cls]}.`)], true);
+  renderVotes();
+}
+function log(lines, reset) {
+  const el = $("log"); if (reset) el.innerHTML = "";
+  for (const l of [].concat(lines)) { const p = document.createElement("p"); if (typeof l === "string") p.textContent = l; else { p.textContent = l.t; p.className = l.c; } el.append(p); }
+  el.scrollTop = el.scrollHeight;
+}
+function renderChart() {
+  const t = $("chart"); t.innerHTML = "";
+  const hr = t.insertRow(); hr.append(Object.assign(document.createElement("th"), { textContent: "Atk ↓ / Def →" }));
+  CLASSES.forEach(c => hr.append(Object.assign(document.createElement("th"), { textContent: c })));
+  for (const a of CLASSES) {
+    const r = t.insertRow(); r.append(Object.assign(document.createElement("th"), { textContent: a }));
+    for (const d of CLASSES) { const m = mult(a, d), td = r.insertCell(); td.textContent = m === 1 ? "×1" : "×" + m; td.className = m > 1 ? "s" : m < 1 ? "w" : ""; if (REASONS[a + ">" + d]) td.title = REASONS[a + ">" + d]; }
+  }
+  $("reasons").textContent = Object.entries(REASONS).map(([k, v]) => `${k.replace(">", " beats ")}: ${v}.`).join(" ");
+}
+
+/* ---------- battle ---------- */
+function dmg(att, def, mv, buff) {
+  const m = mv.typed ? mult(att.cls, def.cls) : 1;
+  const base = (mv.power * (att.ATK * buff) / def.DEF) / 4 + 6;
+  return { n: Math.max(1, Math.round(base * m * (0.85 + Math.random() * 0.15))), m };
+}
+async function act(who) {
+  const me = who === "A" ? A : B, foe = who === "A" ? B : A;
+  const meEl = $(who === "A" ? "fA" : "fB"), foeEl = $(who === "A" ? "fB" : "fA");
+  const mv = who === "A" ? battle.pickA : battle.pickB;
+  meEl.classList.add("lunge"); await wait(260); meEl.classList.remove("lunge");
+  if (mv.buff) {
+    battle["buff" + who] = Math.min(2, battle["buff" + who] * mv.buff);
+    log(`${me.name} used ${mv.name}. ATK is now ×${battle["buff" + who].toFixed(2)}.`); return;
+  }
+  if (Math.random() * 100 >= mv.acc) { log({ t: `${me.name} used ${mv.name}, but it missed.`, c: "weak" }); return; }
+  const { n, m } = dmg(me, foe, mv, battle["buff" + who]);
+  const key = who === "A" ? "hpB" : "hpA"; battle[key] -= n;
+  foeEl.classList.remove("hit"); void foeEl.offsetWidth; foeEl.classList.add("hit");
+  setHp(foeEl, foe, battle[key]);
+  log(`${me.name} used ${mv.name} for ${n} damage.`);
+  if (m > 1) log({ t: `Strong matchup ×1.5: ${REASONS[me.cls + ">" + foe.cls]}.`, c: "eff" });
+  if (m < 1) log({ t: `Weak matchup ×0.67.`, c: "weak" });
+}
+function cpuPick() {
+  const ms = movesFor(B);
+  if (Math.random() < 0.35) return ms[Math.floor(Math.random() * ms.length)];
+  const exp = mv => mv.buff ? (battle.buffB < 1.6 && battle.hpB > B.maxHp * 0.5 ? 22 : 0) : (mv.power * B.ATK * battle.buffB / A.DEF / 4 + 6) * (mv.typed ? mult(B.cls, A.cls) : 1) * mv.acc / 100;
+  return ms.reduce((a, b) => exp(b) > exp(a) ? b : a);
+}
+async function turn(mv) {
+  if (!battle || battle.busy || battle.over) return;
+  battle.busy = true; setMovesDisabled(true);
+  battle.pickA = mv; battle.pickB = cpuPick();
+  const order = A.SPD >= B.SPD ? ["A", "B"] : ["B", "A"];
+  for (const w of order) {
+    await act(w); await wait(420);
+    if (battle.hpA <= 0 || battle.hpB <= 0) return finish();
+  }
+  battle.busy = false; setMovesDisabled(false);
+}
+function finish() {
+  battle.over = true;
+  const winA = battle.hpB <= 0, win = winA ? A : B, lose = winA ? B : A;
+  $(winA ? "fB" : "fA").classList.add("ko");
+  const left = winA ? battle.hpA : battle.hpB;
+  const t = tally(); const total = t.a + t.b;
+  let crowd = "";
+  if (total) { const pct = Math.round((winA ? t.a : t.b) / total * 100); crowd = ` The crowd gave ${win.name} ${pct}% of ${total} vote${total === 1 ? "" : "s"}.`; }
+  log({ t: `${lose.name} is out. ${win.name} wins with ${left} HP left.${crowd}`, c: "end" });
+  $("moves").innerHTML = ""; $("start").textContent = "Rematch"; $("start").disabled = false;
+  $("pickA").disabled = $("pickB").disabled = $("random").disabled = false;
+}
+function setMovesDisabled(d) { $("moves").querySelectorAll("button").forEach(b => b.disabled = d); }
+function start() {
+  card($("fA"), A, "You"); card($("fB"), B, "CPU");
+  battle = { hpA: A.maxHp, hpB: B.maxHp, buffA: 1, buffB: 1, busy: false, over: false };
+  $("start").disabled = true; $("pickA").disabled = $("pickB").disabled = $("random").disabled = true;
+  const box = $("moves"); box.innerHTML = "";
+  for (const mv of movesFor(A)) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "move";
+    const s = document.createElement("span"); s.textContent = mv.name; const sm = document.createElement("small"); sm.textContent = mv.hint;
+    b.append(s, sm); b.onclick = () => turn(mv); box.append(b);
+  }
+  log([`Fight! ${A.SPD >= B.SPD ? A.name : B.name} is faster and moves first each turn.`], true);
+}
+
+/* ---------- crowd votes (shared through db, local fallback) ---------- */
+let db = null, myId = null, votes = {}, writing = false;
+const LOCAL = "local";
+const key = () => [A.name, B.name].sort().join(" | ");
+function tally() {
+  const k = key(); let a = 0, b = 0;
+  for (const p of Object.values(votes)) { if (p[k] === A.name) a++; else if (p[k] === B.name) b++; }
+  return { a, b };
+}
+function renderVotes() {
+  if (!A) return;
+  const { a, b } = tally(), total = a + b;
+  const pa = total ? Math.round(a / total * 100) : 50;
+  $("splitL").style.flexBasis = pa + "%"; $("splitR").style.flexBasis = (100 - pa) + "%";
+  $("splitL").textContent = total ? `${pa}%` : ""; $("splitR").textContent = total ? `${100 - pa}%` : "";
+  $("voteCount").textContent = total ? `${total} vote${total === 1 ? "" : "s"} on this matchup` : "No votes yet";
+  const mine = votes[myId || LOCAL]?.[key()];
+  $("backA").classList.toggle("on", mine === A.name); $("backB").classList.toggle("on", mine === B.name);
+  $("backA").setAttribute("aria-pressed", mine === A.name); $("backB").setAttribute("aria-pressed", mine === B.name);
+}
+function useLocal(reason) {
+  db = null; myId = null;
+  try { votes = { [LOCAL]: JSON.parse(localStorage.getItem("ff-votes") || "{}") }; } catch { votes = { [LOCAL]: {} }; }
+  $("voteNote").textContent = reason; renderVotes();
+}
+async function vote(name) {
+  if (writing) return;
+  const k = key(), uid = myId || LOCAL;
+  const picks = { ...(votes[uid] || {}), [k]: name };
+  if (!db) {
+    votes[LOCAL] = picks; try { localStorage.setItem("ff-votes", JSON.stringify(picks)); } catch {}
+    renderVotes(); return;
+  }
+  writing = true; $("backA").disabled = $("backB").disabled = true;
+  try { await db.doc("votes/" + myId).set({ picks }); $("voteNote").textContent = `You backed ${name}. Change your pick any time.`; }
+  catch (e) { $("voteNote").textContent = e?.code === "permission_denied" || e?.code === "not_granted" ? "Your access lets you watch but not vote. Ask the owner for contributor access to vote." : `Your vote didn't save (${e?.code || "error"}). Try again.`; }
+  finally { writing = false; $("backA").disabled = $("backB").disabled = false; }
+}
+async function connect() {
+  if (!window.claude?.use) return useLocal("Votes are saved in this browser only.");
+  const [d, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+  if (!d || !user) return useLocal("Shared votes aren't available here, so votes are saved in this browser only.");
+  myId = await user.id();
+  if (!myId) return useLocal("Sign in to vote with everyone. For now votes are saved in this browser only.");
+  db = d;
+  const timer = setTimeout(() => { $("voteNote").textContent = "The shared vote is slow to load. Your pick will still count."; }, 10000);
+  db.collection("votes").onSnapshot(snap => {
+    clearTimeout(timer);
+    const names = new Set(ROSTER.map(f => f.name)); votes = {};
+    for (const doc of snap.docs) {
+      const p = doc.data()?.picks; if (!p || typeof p !== "object") continue;
+      const clean = {}; for (const [k, v] of Object.entries(p)) if (typeof v === "string" && names.has(v)) clean[k] = v;
+      votes[doc.id] = clean;
+    }
+    if (!writing) $("voteNote").textContent = "Everyone who opens this page shares one tally. One vote per person per matchup.";
+    renderVotes();
+  }, e => { clearTimeout(timer); $("voteNote").textContent = `The shared vote couldn't load (${e?.code || "error"}).`; });
+}
+
+/* ---------- boot ---------- */
+$("pickA").onchange = () => { let b = $("pickB").value; if (b === $("pickA").value) b = ROSTER.find(f => f.name !== $("pickA").value).name; setMatch($("pickA").value, b); };
+$("pickB").onchange = () => { let a = $("pickA").value; if (a === $("pickB").value) a = ROSTER.find(f => f.name !== $("pickB").value).name; setMatch(a, $("pickB").value); };
+$("random").onclick = () => { const s = [...ROSTER].sort(() => Math.random() - .5); setMatch(s[0].name, s[1].name); };
+$("backA").onclick = () => vote(A.name); $("backB").onclick = () => vote(B.name);
+$("start").onclick = start;
+renderChart();
+Promise.race([
+  Promise.all(ROSTER.map(f => document.fonts.load(`100px "${f.name}"`, "HamburgefonstivAVxH"))),
+  new Promise(r => setTimeout(r, 4000)),
+]).catch(() => {}).then(() => { measure(); fillPickers(); setMatch("Inter", "Playfair Display"); });
+connect();
+</script>

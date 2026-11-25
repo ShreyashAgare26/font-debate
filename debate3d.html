@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Font Debate: three typefaces fight for your product</title>
+<meta name="description" content="Describe what you're building. Three typefaces argue for the job in a live 3D arena, and the last one standing is your font. Works with all 1,800+ Google Fonts.">
+<meta name="theme-color" content="#070a14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230e1428'/%3E%3Crect width='21.4' height='8' fill='%233d8bff'/%3E%3Crect x='21.3' width='21.4' height='8' fill='%2334c46b'/%3E%3Crect x='42.6' width='21.4' height='8' fill='%23ffb020'/%3E%3Ctext x='32' y='48' font-family='Helvetica,Arial,sans-serif' font-weight='800' font-size='32' text-anchor='middle' fill='%23f3f5fa'%3EAa%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" id="fightFonts">
+<style>
+  /* Broadcast package: studio navy plates, three team colours, one on-air red. One family (Archivo) across its width axis. */
+  :root {
+    --night: #070a14; --plate: #0e1428; --plate-2: #161e3a; --plate-3: #1f2a4d;
+    --fg: #f3f5fa; --dim: #a3acc2; --faint: #8590ab; --rule: rgba(243,245,250,.12); --rule-2: rgba(243,245,250,.22);
+    --paper: #f5f3ee; --paper-ink: #0b0f1c; --paper-dim: #5a6072;
+    --c0: #3d8bff; --c1: #34c46b; --c2: #ffb020; --tally: #e0261c;
+    --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --code: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --lift: 0 24px 48px -16px rgba(0,0,0,.7), 0 2px 6px rgba(0,0,0,.35);
+    --wipe: cubic-bezier(.16, 1, .3, 1);
+    --stripe: linear-gradient(90deg, var(--c0) 0 33.33%, var(--c1) 33.33% 66.66%, var(--c2) 66.66% 100%);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+  ::selection { background: var(--c2); color: var(--paper-ink); }
+  input, textarea { caret-color: var(--c2); }
+  * { scrollbar-width: thin; scrollbar-color: var(--plate-3) transparent; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-thumb { background: var(--plate-3); border: 3px solid transparent; background-clip: padding-box; border-radius: 10px; }
+  canvas#gl { display: block; position: fixed; inset: 0; width: 100%; height: 100%; transition: filter .35s; }
+  .hidden { display: none !important; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--c2); outline-offset: 3px; }
+  svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  h1, h2, h3 { margin: 0; font-weight: 800; font-stretch: 70%; text-transform: uppercase; letter-spacing: .005em; line-height: .92; text-wrap: balance; }
+  h1 { font-size: clamp(56px, 9vw, 104px); }
+  h2 { font-size: 34px; }
+  h3 { font-size: 20px; letter-spacing: .02em; }
+  p { margin: 0; }
+  .note { font-size: 13px; color: var(--dim); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .between { justify-content: space-between; }
+  kbd { font-family: var(--code); font-size: 10.5px; font-weight: 500; padding: 1px 5px; border-radius: 3px; border: 1px solid currentColor; opacity: .6; text-transform: none; letter-spacing: 0; }
+
+  /* Plates: opaque broadcast graphics with the tri-colour stripe as the brand mark */
+  .plate { position: relative; background: var(--plate); border-radius: 3px; box-shadow: var(--lift); }
+  .plate.striped::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--stripe); border-radius: 3px 3px 0 0; }
+
+  /* Controls */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 20px; border-radius: 3px; border: 1px solid var(--rule-2); background: transparent; color: var(--fg);
+    font-weight: 750; font-stretch: 80%; font-size: 15px; text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; transition: background .15s, border-color .15s, color .15s, transform .1s; }
+  .btn:hover:not(:disabled) { background: rgba(243,245,250,.07); border-color: rgba(243,245,250,.45); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: .38; cursor: default; }
+  .btn.primary { background: var(--fg); color: var(--paper-ink); border-color: var(--fg); }
+  .btn.primary:hover:not(:disabled) { background: #fff; border-color: #fff; }
+  .btn.small { min-height: 34px; padding: 0 14px; font-size: 13px; }
+  .btn.ghost { border-color: transparent; padding: 0 8px; color: var(--dim); }
+  .btn.ghost:hover:not(:disabled) { color: var(--fg); background: transparent; border-color: transparent; }
+  .icon-btn { width: 40px; min-height: 40px; padding: 0; }
+
+  .overlay { position: fixed; inset: 0; display: grid; place-items: center; padding: 20px; overflow-y: auto; background: rgba(4,6,12,.66); }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; font-weight: 700; font-stretch: 75%; text-transform: uppercase; letter-spacing: .12em; font-size: 13px; color: var(--dim); background: var(--night); z-index: 20; }
+
+  /* The signature move: every graphic arrives with a broadcast wipe */
+  @keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes wipeUp { from { clip-path: inset(100% 0 0 0); transform: translateY(8px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+  .wipe { animation: wipe .5s var(--wipe) both; }
+
+  /* Run of show: segment tabs */
+  .rundown { display: flex; gap: 2px; }
+  .rundown span { position: relative; padding: 7px 12px 9px; font-size: 12px; font-weight: 750; font-stretch: 75%; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); background: var(--plate-2); }
+  .rundown span.on { color: var(--fg); background: var(--plate-3); }
+  .rundown span.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--tally); }
+  .rundown span.done { color: var(--dim); }
+
+  /* Welcome: the pre-show title card */
+  .welcome { width: min(840px, 100%); padding: 44px 44px 32px; display: grid; gap: 28px; animation: wipe .7s var(--wipe) both; }
+  .welcome h1 span { display: block; }
+  .welcome h1 .two { font-stretch: 125%; font-weight: 300; font-size: .52em; letter-spacing: .02em; margin-top: .12em; color: var(--dim); }
+  .welcome .lead { font-size: 19px; line-height: 1.5; max-width: 46ch; color: var(--dim); }
+  .welcome .lead strong { color: var(--fg); font-weight: 600; }
+  .show { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .show li { display: grid; grid-template-columns: 140px 1fr; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .show li b { font-weight: 800; font-stretch: 70%; text-transform: uppercase; font-size: 22px; letter-spacing: .01em; }
+  .show li:nth-child(1) b { color: var(--c0); } .show li:nth-child(2) b { color: var(--c1); } .show li:nth-child(3) b { color: var(--c2); }
+  .show li p { color: var(--dim); }
+
+  /* Brief: the booking desk */
+  .brief { width: min(800px, 100%); padding: 30px 32px 26px; display: grid; gap: 22px; animation: wipe .55s var(--wipe) both; }
+  .brief .head { display: grid; gap: 10px; }
+  .brief .head p { color: var(--dim); }
+  .field { display: grid; gap: 8px; align-content: start; }
+  .lab { font-size: 13px; font-weight: 600; color: var(--dim); display: flex; justify-content: space-between; gap: 8px; }
+  .lab .count { color: var(--faint); font-weight: 500; }
+  .two { display: grid; grid-template-columns: 1fr 1.8fr; gap: 16px; }
+  .input { width: 100%; background: var(--night); border: 1px solid var(--rule-2); border-radius: 3px; padding: 12px 14px; font-size: 16px; color: var(--fg); transition: border-color .15s, box-shadow .15s; }
+  .input:hover { border-color: rgba(243,245,250,.35); }
+  .input:focus { outline: none; border-color: var(--c0); box-shadow: 0 0 0 3px rgba(61,139,255,.25); }
+  textarea.input { min-height: 96px; resize: vertical; line-height: 1.5; }
+  .input::placeholder { color: var(--faint); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { position: relative; padding: 7px 12px; border-radius: 3px; border: 1px solid var(--rule-2); background: transparent; font-size: 14px; font-weight: 550; color: var(--dim); transition: background .15s, color .15s, border-color .15s; }
+  .chip:hover { color: var(--fg); border-color: rgba(243,245,250,.45); }
+  .chip[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--paper-ink); }
+  .chip.auto { box-shadow: inset 0 -3px 0 var(--c2); }
+  .examples { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: -8px; }
+  .examples > span { font-size: 13px; font-weight: 600; color: var(--faint); margin-right: 6px; }
+  .examples .chip { padding: 4px 10px; font-size: 13px; border-color: transparent; background: var(--plate-2); color: var(--dim); }
+  .examples .chip:hover { background: var(--plate-3); color: var(--fg); border-color: transparent; }
+  .err { color: #ff8a80; font-weight: 600; font-size: 13.5px; }
+  .err:empty { display: none; } .err:not(:empty) + .note { display: none; }
+  .legend { display: inline-flex; align-items: center; gap: 8px; } .legend i { width: 12px; height: 3px; background: var(--c2); display: inline-block; }
+
+  /* Lineup: tale of the tape */
+  #lineup { position: fixed; left: 0; right: 0; bottom: 0; padding: 16px; display: grid; justify-items: center; pointer-events: none; }
+  .tape { pointer-events: auto; width: min(1100px, 100%); display: grid; animation: wipeUp .55s var(--wipe) both; }
+  .tape-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; padding: 20px 22px 16px; border-bottom: 1px solid var(--rule); }
+  .tape-head p { color: var(--dim); margin-top: 8px; max-width: 64ch; font-size: 14px; }
+  .slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .slot { --acc: var(--c0); position: relative; padding: 18px 22px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; border-left: 1px solid var(--rule); }
+  .slot:first-child { border-left: 0; }
+  .slot::before { content: ""; position: absolute; left: 22px; right: 22px; top: 0; height: 3px; background: var(--acc); }
+  .slot.s1, .tcard.s1 { --acc: var(--c1); } .slot.s2, .tcard.s2 { --acc: var(--c2); }
+  .slot .corner { font-size: 12px; font-weight: 750; font-stretch: 75%; text-transform: uppercase; letter-spacing: .1em; color: var(--acc); }
+  .slot .corner em { font-style: normal; color: var(--paper-ink); background: var(--acc); padding: 2px 6px; margin-left: 6px; }
+  .slot .fname { font-size: 30px; line-height: 1.05; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .slot .spec { font-size: 22px; line-height: 1.2; background: var(--paper); color: var(--paper-ink); padding: 8px 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; border-radius: 2px; }
+  .stats { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0; font-size: 13px; }
+  .stats dt { color: var(--faint); font-weight: 600; } .stats dd { margin: 0; color: var(--fg); text-align: right; }
+  .fit { display: flex; align-items: baseline; gap: 10px; }
+  .fit b { font-size: 40px; font-weight: 800; font-stretch: 65%; line-height: 1; }
+  .fit b small { font-size: .45em; font-weight: 700; margin-left: 1px; color: var(--dim); }
+  .fit .meter { flex: 1; height: 3px; background: var(--rule); position: relative; }
+  .fit .meter i { position: absolute; inset: 0 auto 0 0; background: var(--acc); }
+  .slot .pro { color: var(--dim); font-size: 13.5px; line-height: 1.45; min-height: 2.9em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .slot .btn { align-self: flex-start; margin-top: auto; }
+
+  /* Picker */
+  .picker { width: min(720px, 100%); max-height: min(780px, calc(100vh - 40px)); padding: 26px 26px 18px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 14px; animation: wipe .45s var(--wipe) both; }
+  .plist { overflow-y: auto; background: var(--night); border: 1px solid var(--rule); border-radius: 3px; min-height: 220px; }
+  .prow { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 14px; align-items: center; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 12px 16px; color: var(--fg); transition: background .12s; }
+  .prow:hover:not(:disabled), .prow:focus-visible { background: var(--plate-2); }
+  .prow:disabled { opacity: .35; cursor: default; }
+  .prow .pn { font-size: 26px; line-height: 1.2; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .prow .pm { font-size: 12.5px; color: var(--faint); grid-column: 1; }
+  .prow .pf { grid-row: 1 / 3; grid-column: 2; text-align: right; font-weight: 800; font-stretch: 70%; font-size: 26px; line-height: 1; }
+  .prow .pf small { display: block; font-weight: 600; font-stretch: 100%; font-size: 11px; color: var(--faint); margin-top: 4px; }
+  .select { background: var(--night); border: 1px solid var(--rule-2); border-radius: 3px; padding: 7px 10px; font-size: 13px; color: var(--fg); }
+
+  /* HUD: score bug */
+  #pill { position: fixed; top: 16px; left: 16px; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: center; column-gap: 14px; padding: 10px 16px 11px 14px; max-width: min(520px, calc(100vw - 260px)); }
+  #pill::before { content: "LIVE"; grid-row: 1 / 3; align-self: stretch; display: grid; place-items: center; padding: 0 10px 0 22px; background: var(--tally) radial-gradient(circle at 10px 50%, #fff 0 3.5px, transparent 4px); font-size: 12px; font-weight: 800; font-stretch: 75%; letter-spacing: .12em; margin: -10px 0 -11px -14px; border-radius: 3px 0 0 3px; animation: tally 2s ease-in-out infinite; }
+  @keyframes tally { 50% { background-color: #b81d14; } }
+  #pill .k { font-size: 12px; font-weight: 700; font-stretch: 80%; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); }
+  #pill .t { font-size: 22px; font-weight: 800; font-stretch: 68%; text-transform: uppercase; letter-spacing: .01em; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #pill .dots { grid-column: 2; display: flex; gap: 3px; margin-top: 7px; }
+  #pill .dots i { width: 16px; height: 3px; background: var(--rule-2); }
+  #pill .dots i.done { background: var(--fg); } #pill .dots i.now { background: var(--tally); }
+  #pill .copy { display: grid; min-width: 0; }
+  #tools { position: fixed; top: 16px; right: 16px; display: flex; gap: 6px; }
+  #tools .btn { background: var(--plate); border: 0; box-shadow: var(--lift); }
+  #tools .btn:hover { background: var(--plate-2); }
+
+  /* HUD: lower third + scoreboard */
+  #bottom { position: fixed; left: 16px; right: 16px; bottom: 16px; display: grid; gap: 10px; max-width: 1140px; margin: 0 auto; }
+  .dialog-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+  #dialog { display: grid; justify-items: start; min-height: 82px; align-content: end; }
+  #dialog .who { --acc: var(--plate-3); background: var(--acc); color: #fff; padding: 5px 12px 4px; font-size: 13px; font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: .1em; animation: wipe .35s var(--wipe) both; }
+  #dialog .bar3 { width: 100%; display: flex; align-items: center; gap: 16px; justify-content: space-between; background: var(--paper); color: var(--paper-ink); padding: 12px 18px 13px; box-shadow: var(--lift); animation: wipe .5s .05s var(--wipe) both; border-radius: 0 3px 3px 3px; }
+  #dialog .line { font-size: 21px; line-height: 1.3; }
+  #dialog .narr { font-weight: 600; font-stretch: 90%; }
+  #dialog .dmg { flex: none; background: var(--tally); color: #fff; padding: 5px 10px; font-weight: 800; font-stretch: 75%; text-transform: uppercase; letter-spacing: .06em; font-size: 13px; border-radius: 2px; }
+  .next-col { display: grid; gap: 6px; min-width: 200px; }
+  #next { min-height: 52px; font-size: 16px; }
+  .auto-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--fg); text-shadow: 0 1px 6px rgba(0,0,0,.8); cursor: pointer; padding: 4px; }
+  .auto-toggle input { appearance: none; width: 28px; height: 16px; border-radius: 8px; background: var(--plate-3); box-shadow: 0 0 0 1px var(--rule-2); position: relative; margin: 0; cursor: pointer; transition: background .15s; }
+  .auto-toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--dim); transition: transform .2s var(--wipe), background .15s; }
+  .auto-toggle input:checked { background: var(--c2); } .auto-toggle input:checked::after { transform: translateX(12px); background: var(--paper-ink); }
+  #tray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--plate); border-radius: 3px; box-shadow: var(--lift); animation: wipeUp .5s var(--wipe) both; }
+  .tcard { --acc: var(--c0); position: relative; padding: 12px 16px 14px; display: grid; gap: 8px; min-width: 0; border-left: 1px solid var(--rule); transition: opacity .4s, background .3s; }
+  .tcard:first-child { border-left: 0; }
+  .tcard::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--acc); transform: scaleY(.5); transform-origin: top; transition: transform .25s var(--wipe); }
+  .tcard.lead { background: var(--plate-2); } .tcard.lead::before { transform: none; }
+  .tcard .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .tcard .nm { font-size: 21px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tcard .hpn { font-size: 30px; font-weight: 800; font-stretch: 62%; line-height: .9; white-space: nowrap; }
+  .tcard .hpn small { font-size: 12px; font-weight: 700; font-stretch: 80%; color: var(--faint); margin-left: 3px; letter-spacing: .08em; }
+  .hp { height: 4px; background: var(--rule); position: relative; overflow: hidden; }
+  .hp i { position: absolute; inset: 0 auto 0 0; background: var(--acc); transition: width .55s var(--wipe); }
+  .hp b { position: absolute; inset: 0 auto 0 0; background: var(--tally); transition: width .9s .45s ease-out; }
+  .hp i.low { background: var(--tally); }
+  .tcard .sample { background: var(--paper); color: var(--paper-ink); border-radius: 2px; padding: 10px 12px; height: 108px; overflow: hidden; overflow-wrap: anywhere; transition: opacity .25s; }
+  .tcard.hit { animation: jolt .35s; }
+  .tcard.ko { opacity: .45; }
+  .tcard.ko::after { content: "K.O."; position: absolute; right: 14px; top: 10px; background: var(--tally); color: #fff; font-weight: 800; font-stretch: 65%; font-size: 15px; letter-spacing: .06em; padding: 2px 8px; transform: skewX(-10deg); }
+  .tcard.ko .hpn { visibility: hidden; }
+  .tcard.win { background: var(--plate-2); }
+  @keyframes jolt { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(5px)} 75%{transform:translateX(-2px)} }
+  .s-ui { display: grid; gap: 5px; font-size: 13px; }
+  .s-ui .in { border: 1px solid #c9ccd4; background: #fff; border-radius: 4px; padding: 5px 8px; }
+  .s-ui .bt { background: var(--paper-ink); color: #fff; border-radius: 4px; padding: 7px; text-align: center; font-weight: 700; }
+  .s-ui small { font-size: 11px; color: var(--paper-dim); }
+  .s-head { font-size: 30px; line-height: 1.05; font-weight: 700; }
+  .s-read { font-size: 14px; line-height: 1.5; }
+  .s-num { font-size: 22px; line-height: 1.35; font-variant-numeric: tabular-nums; }
+  .s-brand { font-size: 44px; line-height: 1; font-weight: 700; display: grid; place-items: center; height: 100%; text-align: center; }
+  .s-vibe b { display: block; font-size: 30px; line-height: 1.1; } .s-vibe span { font-size: 14px; line-height: 1.4; }
+  .s-intro { font-size: 52px; line-height: 1; } .s-intro small { display: block; font-size: 14px; margin-top: 8px; color: var(--paper-dim); }
+
+  /* Coach marks */
+  .coach { position: fixed; z-index: 6; background: var(--paper); color: var(--paper-ink); border-radius: 3px; padding: 10px 14px 11px; font-size: 14px; font-weight: 600; box-shadow: var(--lift); max-width: 280px; animation: wipe .4s var(--wipe) both; }
+  .coach::after { content: ""; position: absolute; width: 12px; height: 12px; background: var(--paper); transform: rotate(45deg); bottom: -6px; left: var(--arrow, 50%); margin-left: -6px; }
+  .coach .x { margin-left: 10px; font-size: 12px; font-weight: 700; color: var(--paper-dim); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; }
+
+  /* Cinematics */
+  .bar { position: fixed; left: 0; right: 0; height: 7vh; background: #000; z-index: 4; transform: scaleY(0); transition: transform .35s var(--wipe); pointer-events: none; }
+  #barTop { top: 0; transform-origin: top; } #barBot { bottom: 0; transform-origin: bottom; }
+  body.cine .bar { transform: none; }
+  body.busy, body.busy * { cursor: progress !important; }
+  body.cine #pill, body.cine #tools { opacity: 0; transition: opacity .2s; }
+  body.cine #tray .sample { display: none; }
+  #bottom { transition: transform .35s var(--wipe); }
+  body.cine #bottom { transform: translateY(calc(-7vh + 6px)); }
+  #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 5; }
+  #ko { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 5; }
+  #ko span { display: block; font-size: clamp(110px, 24vw, 300px); font-weight: 900; font-stretch: 62%; line-height: .85; color: #fff; padding: .04em .22em .02em; background: var(--tally); clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%); letter-spacing: -0.01em; }
+  #ko.show span { animation: slam .55s cubic-bezier(.2,1.5,.4,1) both; }
+  @keyframes slam { 0% { transform: scale(2.4) skewX(-10deg); opacity: 0; } 100% { transform: scale(1) skewX(-10deg); opacity: 1; } }
+
+  /* Verdict: final result graphic */
+  #verdict { position: fixed; top: 16px; right: 16px; bottom: 16px; width: min(460px, calc(100vw - 32px)); overflow-y: auto; padding: 30px 26px 24px; display: grid; grid-auto-rows: max-content; gap: 22px; align-content: start; animation: wipe .6s var(--wipe) both; }
+  .v-head { display: grid; gap: 6px; }
+  .v-head h2 { font-size: 22px; color: var(--dim); }
+  .v-head h2 span { color: var(--fg); }
+  #verdict .big { font-size: clamp(44px, 6vw, 66px); line-height: 1; overflow-wrap: anywhere; }
+  .specimen { background: var(--paper); color: var(--paper-ink); border-radius: 2px; padding: 16px 18px; display: grid; gap: 6px; }
+  .specimen b { font-size: 36px; line-height: 1.05; } .specimen span { font-size: 15px; line-height: 1.5; color: var(--paper-dim); }
+  .specimen small { font-size: 12px; font-weight: 600; color: var(--paper-dim); border-top: 1px solid rgba(11,15,28,.14); padding-top: 8px; margin-top: 4px; }
+  .sect { display: grid; gap: 10px; }
+  .sect > h3 { font-size: 16px; letter-spacing: .08em; color: var(--dim); font-stretch: 80%; }
+  #verdict ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14.5px; }
+  #verdict ul li::marker { color: var(--faint); }
+  .score { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .score th, .score td { padding: 8px 4px; border-bottom: 1px solid var(--rule); text-align: left; }
+  .score th { font-weight: 600; color: var(--faint); font-size: 12.5px; }
+  .score th.f { font-size: 15px; max-width: 96px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pips { display: inline-flex; gap: 2px; vertical-align: middle; } .pips i { width: 7px; height: 9px; background: var(--rule-2); } .pips i.on { background: var(--dim); }
+  .score td.best .pips i.on { background: var(--acc, var(--fg)); }
+  .score td.hpcell { font-weight: 800; font-stretch: 70%; font-size: 18px; }
+  .score td.hpcell.out { color: var(--tally); font-size: 14px; }
+  .seg { display: grid; gap: 4px; }
+  .seg button { display: flex; justify-content: space-between; gap: 10px; align-items: center; text-align: left; background: var(--plate-2); border: 1px solid transparent; border-radius: 3px; padding: 10px 14px; font-size: 19px; transition: background .15s, border-color .15s; }
+  .seg button:hover { border-color: var(--rule-2); }
+  .seg button small { font-family: var(--sans); font-size: 11.5px; font-weight: 750; font-stretch: 80%; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+  .seg button[aria-pressed="true"] { background: var(--fg); color: var(--paper-ink); } .seg button[aria-pressed="true"] small { color: var(--paper-dim); }
+  #verdict pre { margin: 0; background: var(--night); border: 1px solid var(--rule); color: #dfe5f2; border-radius: 3px; padding: 14px; font-family: var(--code); font-size: 12px; line-height: 1.55; overflow-x: auto; white-space: pre; }
+  #verdict a { color: var(--fg); font-weight: 650; text-underline-offset: 4px; text-decoration-color: var(--rule-2); display: inline-flex; gap: 6px; align-items: center; }
+  #verdict a:hover { text-decoration-color: var(--fg); }
+  .divider { height: 1px; background: var(--rule); border: 0; margin: 0; width: 100%; }
+
+  @media (max-width: 760px) {
+    h2 { font-size: 28px; }
+    .two { grid-template-columns: 1fr; }
+    .welcome, .brief { padding: 26px 20px 20px; }
+    .show li { grid-template-columns: 1fr; gap: 2px; }
+    .slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .slot { padding: 14px 10px; gap: 6px; } .slot::before { left: 10px; right: 10px; }
+    .slot .fname { font-size: 16px; } .slot .spec, .slot .pro, .slot .stats { display: none; } .fit b { font-size: 28px; } .slot .corner em { display: none; }
+    .slot .btn { padding: 0 6px; font-size: 11.5px; letter-spacing: .04em; align-self: stretch; gap: 6px; } .slot .btn svg { display: none; }
+    .tape-head { padding: 14px; } .tape-head p { display: none; } .tape-head h2 { font-size: 24px; }
+    .rundown { display: none; }
+    #pill { top: 8px; left: 8px; max-width: calc(100vw - 150px); padding: 8px 12px 9px 10px; column-gap: 10px; }
+    #pill::before { margin: -8px 0 -9px -10px; padding: 0 6px 0 18px; font-size: 11px; background-position: 0 0; }
+    #pill .t { font-size: 16px; } #pill .dots i { width: 10px; }
+    .wide-only { display: none; }
+    #tools { top: 8px; right: 8px; gap: 4px; } .icon-btn { width: 36px; min-height: 36px; }
+    #bottom { left: 8px; right: 8px; bottom: 8px; gap: 6px; }
+    .dialog-row { grid-template-columns: 1fr; }
+    .next-col { grid-template-columns: 1fr auto; min-width: 0; }
+    #dialog { min-height: 0; } #dialog .line { font-size: 15px; } #dialog .bar3 { padding: 9px 12px; }
+    .tcard { padding: 10px 8px; } .tcard .top { flex-direction: column; gap: 2px; } .tcard .nm { font-size: 13px; max-width: 100%; } .tcard .hpn { font-size: 22px; } .tcard .sample { display: none; }
+    #verdict { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 62vh; padding: 22px 18px; }
+  }
+  @media (max-height: 760px) and (min-width: 761px) {
+    .tcard .sample { height: 64px; padding: 6px 8px; }
+    .tcard .sample > * { transform: scale(.62); transform-origin: top left; width: 161%; }
+    #dialog { min-height: 0; } #dialog .line { font-size: 17px; } #dialog .bar3 { padding: 9px 16px; }
+    #next { min-height: 44px; }
+    .slot .pro, .slot .spec, .slot .stats { display: none; }
+    .tape-head p { display: none; } .tape-head { padding: 14px 22px 12px; }
+  }
+  @media (max-height: 560px) and (min-width: 761px) {
+    .tcard .sample { display: none; }
+    .auto-toggle { display: none; }
+    .tape-head .rundown { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.3 6.5a8 8 0 0 1 0 11"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.6v.2"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 6l7 6-7 6zM13 6l7 6-7 6z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></symbol>
+</svg>
+<canvas id="gl"></canvas>
+<div id="loading">Warming up the studio</div>
+<div class="bar" id="barTop"></div><div class="bar" id="barBot"></div>
+<div id="flash"></div>
+<div id="ko" class="hidden"><span>K.O.</span></div>
+
+<!-- First-time welcome (also the Help screen) -->
+<div id="welcome" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+  <div class="plate striped welcome">
+    <h1 id="wTitle"><span>Font Debate</span><span class="two">Live from the arena</span></h1>
+    <p class="lead">Describe what you're building. Three typefaces argue for the job, <strong>live</strong>, round by round. The last one standing is your font, and you leave with the CSS.</p>
+    <ol class="show" aria-label="How it works">
+      <li><b>The brief</b><p>Name your product and say how it should feel. We read the personality from your words.</p></li>
+      <li><b>The lineup</b><p>We book three fonts that fit. Keep them, or swap in any of the 1,800+ Google Fonts.</p></li>
+      <li><b>The debate</b><p>Each round tests one part of your brief. Lose a round, lose HP. You make the final call.</p></li>
+    </ol>
+    <div class="row between"><span class="note"><kbd>Space</kbd> next round &nbsp;·&nbsp; <kbd>Esc</kbd> close &nbsp;·&nbsp; the fonts speak, so turn your sound on</span><button type="button" class="btn primary" id="welcomeGo">Let's go</button></div>
+  </div>
+</div>
+
+<!-- Step 1: brief -->
+<div id="brief" class="overlay hidden">
+  <form class="plate striped brief" id="briefForm" novalidate>
+    <div class="row between">
+      <div class="rundown" aria-label="Progress"><span class="on">Brief</span><span>Lineup</span><span>Debate</span></div>
+      <button type="button" class="btn small ghost" data-help><svg class="i"><use href="#i-help"/></svg>How it works</button>
+    </div>
+    <div class="head"><h2>What are you building?</h2><p>The more you say about the feeling, the sharper the matchup.</p></div>
+    <div class="examples"><span>Try</span></div>
+    <div class="two">
+      <label class="field"><span class="lab">Product name</span><input class="input" id="name" placeholder="Paywise" maxlength="40" autocomplete="off"></label>
+      <label class="field"><span class="lab">What is it, who is it for, how should it feel?</span><textarea class="input" id="desc" placeholder="A budgeting app for college students. Friendly and a bit fun, but people trust it with their money."></textarea></label>
+    </div>
+    <div class="field"><span class="lab"><span>Personality, up to three</span><span class="count" id="toneCount">0 / 3</span></span><div class="chips" id="tones"></div><p class="note legend hidden" id="toneLegend"><i></i>Picked from your description</p></div>
+    <div class="field"><span class="lab">Where will the font be used?</span><div class="chips" id="uses"></div></div>
+    <div class="row between"><p class="err" id="briefErr" role="alert"></p><span class="note" id="roundsNote">Each pick becomes a round.</span><button type="submit" class="btn primary" id="briefGo">Book the contenders<svg class="i"><use href="#i-arrow"/></svg></button></div>
+  </form>
+</div>
+
+<!-- Step 2: lineup -->
+<div id="lineup" class="hidden">
+  <div class="plate striped tape">
+    <div class="tape-head">
+      <div>
+        <div class="rundown"><span class="done">Brief</span><span class="on">Lineup</span><span>Debate</span></div>
+        <h2 style="margin-top:14px">Tale of the tape</h2>
+        <p id="lineupSub"></p>
+      </div>
+      <div class="row">
+        <button type="button" class="btn small ghost" id="toBrief"><svg class="i"><use href="#i-back"/></svg>Edit brief</button>
+        <button type="button" class="btn small ghost hidden" id="resetLineup">Back to our picks</button>
+        <button type="button" class="btn primary" id="startFight">Start the debate<svg class="i"><use href="#i-arrow"/></svg></button>
+      </div>
+    </div>
+    <div class="slots" id="slots"></div>
+  </div>
+</div>
+
+<!-- Font picker -->
+<div id="picker" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="plate striped picker">
+    <div class="row between"><h2 id="pTitle">Pick a font</h2><button type="button" class="btn icon-btn" id="pClose" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <input class="input" id="pSearch" placeholder="Search 1,800+ Google Fonts" autocomplete="off" aria-label="Search fonts">
+    <div class="row between"><div class="chips" id="pCats"></div>
+      <label class="row" style="gap:8px"><span class="note">Sort</span><select class="select" id="pSort"><option value="fit">Best fit</option><option value="pop">Most popular</option><option value="az">A to Z</option></select></label></div>
+    <div class="plist" id="pList" role="listbox" aria-label="Fonts"></div>
+    <p class="note" id="pCount"></p>
+  </div>
+</div>
+
+<!-- Step 3: fight HUD -->
+<div id="hud" class="hidden">
+  <div id="pill" class="plate" aria-live="polite"><div class="copy"><span class="k" id="pillKicker"></span><span class="t" id="pillTitle"></span></div><div class="dots" id="pillDots"></div></div>
+  <div id="tools">
+    <button type="button" class="btn icon-btn" id="sound" aria-label="Mute sound" title="Sound"><svg class="i"><use href="#i-sound"/></svg></button>
+    <button type="button" class="btn icon-btn" data-help aria-label="How it works" title="How it works"><svg class="i"><use href="#i-help"/></svg></button>
+    <button type="button" class="btn small" id="skip"><svg class="i"><use href="#i-skip"/></svg>Skip<span class="wide-only">&nbsp;to verdict</span></button>
+  </div>
+  <div id="bottom">
+    <div class="dialog-row">
+      <div id="dialog" aria-live="polite"></div>
+      <div class="next-col">
+        <button type="button" class="btn primary" id="next">Round 1 <kbd>Space</kbd></button>
+        <label class="auto-toggle"><input type="checkbox" id="auto"> Auto-play</label>
+      </div>
+    </div>
+    <div id="tray"></div>
+  </div>
+</div>
+
+<!-- Verdict -->
+<aside id="verdict" class="plate striped hidden" aria-label="Verdict">
+  <div class="v-head"><h2>Final result for <span id="vFor"></span></h2><p class="big" id="vName"></p></div>
+  <div class="specimen" id="vSpec"></div>
+  <div class="sect"><h3>Why it won</h3><ul id="vWhy"></ul></div>
+  <div class="sect"><h3>Scorecard</h3><table class="score" id="vScore"></table></div>
+  <hr class="divider">
+  <div class="sect"><h3>Your call</h3><p class="note">The arena advises. You decide.</p><div class="seg" id="vPick"></div><p class="note" id="vPickNote"></p></div>
+  <div class="sect"><h3>Pair it with</h3><p class="note" id="vPair"></p><div class="seg" id="vPairs"></div></div>
+  <pre id="vCss"></pre>
+  <div class="row between"><button type="button" class="btn small" id="copy">Copy CSS</button><a id="vLink" target="_blank" rel="noopener">View on Google Fonts<svg class="i"><use href="#i-out"/></svg></a></div>
+  <hr class="divider">
+  <div class="row"><button type="button" class="btn" id="rematch">Rematch</button><button type="button" class="btn primary" id="again">New brief</button></div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="google-fonts.js"></script>
+<script src="debate-logic.js"></script>
+<script>
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const SLOT = ["#3d8bff", "#34c46b", "#ffb020"];
+const fam = f => `"${f.name}", ${FALLBACK[f.cat]}`;
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const store = { get(k, d) { try { const v = localStorage.getItem("fd3d-" + k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem("fd3d-" + k, JSON.stringify(v)); } catch {} } };
+
+const ROUND_COPY = {
+  ui: ["App / UI test", "Can it label a button at 14px?", "At 14px I'm still crisp."],
+  head: ["Headline test", "Your name, big and loud.", "Put me in a hero section and watch."],
+  read: ["Long reading test", "A real paragraph at body size.", "Three paragraphs of me and your eyes won't complain."],
+  num: ["Numbers test", "Prices, IDs, look-alike characters.", "My 0 is not an O, and my 1 is not an l."],
+  brand: ["Brand test", "Does it look like a logo?", "That's not just text. That's a wordmark."],
+};
+const TONE_LINES = {
+  playful: "I bring the fun without trying too hard.", serious: "When it matters, people take me seriously.",
+  luxury: "I don't need a price tag to look expensive.", technical: "I look like I ship to production.",
+  friendly: "People feel welcome the second they see me.", editorial: "I was made for stories worth reading.",
+  retro: "I've got nostalgia in every curve.", bold: "Quiet is not my thing.", calm: "Breathe. I keep things easy on the eyes.",
+  trustworthy: "You'd hand me your bank details. Admit it.",
+};
+const EXAMPLES = [
+  { label: "Student fintech", name: "Paywise", desc: "A budgeting app for college students. Should feel friendly and a bit fun, but people trust it with their money.", uses: ["ui", "head", "num"] },
+  { label: "Luxury candles", name: "Maison Ombre", desc: "Hand-poured luxury candles sold in boutique stores. Elegant and calm, with an editorial feel.", uses: ["head", "brand", "read"] },
+  { label: "Developer tool", name: "Stackbeam", desc: "An API monitoring tool for developers. Technical and precise, but calm when things break.", uses: ["ui", "num", "head"] },
+  { label: "Kids reading app", name: "Tiny Tales", desc: "A reading app for kids aged 5 to 8. Playful, friendly and very easy to read.", uses: ["read", "head", "brand"] },
+];
+
+/* ================= SOUND (synthesised, no files) ================= */
+const sfx = (() => {
+  let ac = null, noise = null, muted = store.get("muted", false);
+  const ctx = () => { if (!ac) { ac = new (window.AudioContext || window.webkitAudioContext)(); const b = ac.createBuffer(1, ac.sampleRate, ac.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; noise = b; } if (ac.state === "suspended") ac.resume(); return ac; };
+  const env = (g, t, a, peak, dur) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); };
+  function noiseHit(type, f0, f1, dur, peak, q = 1) {
+    const a = ctx(), t = a.currentTime, s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    s.buffer = noise; s.loop = true; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    env(g, t, 0.02, peak, dur); s.connect(f).connect(g).connect(a.destination); s.start(t); s.stop(t + dur + 0.05);
+  }
+  function tone(f0, f1, dur, peak, type = "sine", delay = 0) {
+    const a = ctx(), t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    env(g, t, 0.005, peak, dur); o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  const play = fn => (...a) => { if (muted) return; try { fn(...a); } catch {} };
+  return {
+    unlock() { try { ctx(); } catch {} },
+    get muted() { return muted; }, toggle() { muted = !muted; store.set("muted", muted); return muted; },
+    whoosh: play(() => noiseHit("bandpass", 300, 2400, 0.28, 0.35, 0.8)),
+    impact: play(power => { tone(160, 38, 0.32, 0.7 + power * 0.25); noiseHit("lowpass", 2400, 300, 0.16, 0.5); }),
+    ko: play(() => { tone(120, 28, 1.1, 0.95); noiseHit("lowpass", 1800, 120, 0.9, 0.6); noiseHit("bandpass", 600, 1400, 1.8, 0.25, 0.4); }),
+    cheer: play((len = 1.2) => noiseHit("bandpass", 700, 1500, len, 0.18, 0.5)),
+    bell: play(() => { tone(880, 870, 1.1, 0.25, "triangle"); tone(1320, 1310, 0.9, 0.12, "sine", 0.01); }),
+    pop: play(() => tone(520, 900, 0.09, 0.15, "triangle")),
+    fanfare: play(() => [523, 659, 784, 1046].forEach((f, i) => tone(f, f, 0.5, 0.18, "triangle", i * 0.12))),
+  };
+})();
+
+/* ================= VOICES (the browser's built-in speech engine: free, no key, works offline) ================= */
+const voice = (() => {
+  const synth = window.speechSynthesis; let voices = [];
+  const load = () => { voices = synth ? synth.getVoices().filter(v => /^en/i.test(v.lang)) : []; };
+  if (synth) { load(); if (synth.addEventListener) synth.addEventListener("voiceschanged", load); }
+  // macOS ships joke voices (Bells, Zarvox, Bad News...). Keep them out of the cast.
+  const NOVELTY = /Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Organ|Pipe|Superstar|Trinoids|Whisper|Wobble|Zarvox|Junior|Ralph|Fred|Kathy|Princess|Grandma|Grandpa|Eddy|Flo|Reed|Rocko|Sandy|Shelley/i;
+  const PREFER = ["Samantha", "Daniel", "Karen", "Moira", "Alex", "Tessa", "Rishi", "Google US English", "Google UK English Male", "Google UK English Female", "Microsoft"];
+  function cast() { const ok = voices.filter(v => !NOVELTY.test(v.name)), p = ok.length ? ok : voices; return [...new Set([...PREFER.map(n => p.find(v => v.name.includes(n))).filter(Boolean), ...p])]; }
+  // Each font category speaks in character
+  const STYLE = { Sans: { pitch: 1.05, rate: 1.06 }, Serif: { pitch: 0.8, rate: 0.95 }, Mono: { pitch: 0.55, rate: 1.1 }, Display: { pitch: 0.7, rate: 0.92 }, Hand: { pitch: 1.45, rate: 1.05 } };
+  return {
+    get on() { return !!synth && voices.length > 0 && !sfx.muted; },
+    stop() { if (synth) synth.cancel(); },
+    // Resolves when the line has been spoken (or at once when voices are off)
+    speak(ch, text) {
+      return new Promise(res => {
+        if (!this.on) return res();
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(text), c = cast(), st = ch ? STYLE[ch.cat] : { pitch: 1, rate: 1.1 };
+        const pick = c[(ch ? ch.slot + 1 : 0) % c.length];
+        try { u.voice = pick; } catch { /* keep the browser's default voice */ }
+        u.pitch = st.pitch; u.rate = st.rate; u.__cast = pick && pick.name;
+        let done = false;
+        const end = () => { if (done) return; done = true; clearTimeout(net); if (ch) ch.talking = false; res(); };
+        const net = setTimeout(end, 2000 + text.length * 95); // some browsers never fire "end"
+        u.onend = u.onerror = end;
+        synth.speak(u);
+      });
+    },
+  };
+})();
+
+/* ================= THREE SETUP ================= */
+const canvas = $("gl");
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); }
+catch (e) { $("loading").textContent = "This needs WebGL, and your browser has it switched off. Try another browser."; throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x070a14); scene.fog = new THREE.Fog(0x070a14, 44, 100);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 300);
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+// Panels cover part of the screen, so every frame we re-center the 3D view on the space that's left.
+const shift = { x: 0, y: 0 };
+let freeFrac = 1; // share of the screen height not covered by panels
+function frameView(dt) {
+  let tx = 0, ty = 0, free = 1;
+  const open = id => !$(id).classList.contains("hidden");
+  if (open("verdict")) { const r = $("verdict").getBoundingClientRect(); if (r.left > innerWidth * 0.3) tx = innerWidth / 2 - r.left / 2; else ty = innerHeight / 2 - r.top / 2; }
+  else if (open("lineup")) { const top = $("lineup").getBoundingClientRect().top; ty = innerHeight / 2 - top / 2; free = top / innerHeight; }
+  else if (open("hud")) { const top = $("bottom").getBoundingClientRect().top; ty = innerHeight / 2 - top / 2; free = top / innerHeight; }
+  freeFrac += (Math.max(0.35, Math.min(1, free)) - freeFrac) * Math.min(1, dt * 6);
+  const k = Math.min(1, dt * 6); shift.x += (Math.max(0, tx) - shift.x) * k; shift.y += (Math.max(0, ty) - shift.y) * k;
+  if (Math.abs(shift.x) + Math.abs(shift.y) > 0.5) camera.setViewOffset(innerWidth, innerHeight, shift.x, shift.y, innerWidth, innerHeight); else camera.clearViewOffset();
+}
+scene.add(new THREE.HemisphereLight(0xcfdcff, 0x1a2140, 0.72));
+const sun = new THREE.DirectionalLight(0xfff4e0, 0.8);
+sun.position.set(6, 22, 14); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 60 });
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0x8fb8ff, 0.35); rim.position.set(-10, 8, -14); scene.add(rim);
+const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.7, flatShading: true, ...extra });
+const mesh = (geo, m, shadow = true) => { const o = new THREE.Mesh(geo, m); o.castShadow = shadow; o.receiveShadow = true; return o; };
+
+function canvasTex(w, h) { const c = document.createElement("canvas"); c.width = w; c.height = h; const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return { c, x: c.getContext("2d"), t }; }
+function rr(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
+function fitPx(x, text, weight, family, maxW, start) { x.font = `${weight} ${start}px ${family}`; const w = x.measureText(text).width; return w > maxW ? Math.floor(start * maxW / w) : start; }
+const texCache = {};
+function glyphTexture(fontName, text, fg, size = 256) {
+  const key = fontName + text + fg + size;
+  if (texCache[key]) return texCache[key];
+  const { x, t } = canvasTex(size, size);
+  x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "middle";
+  x.strokeStyle = "#16181d"; x.lineWidth = size * 0.03; x.lineJoin = "round";
+  const px = fitPx(x, text, 700, `"${fontName}"`, size * 0.84, size * 0.66);
+  x.font = `700 ${px}px "${fontName}"`; x.strokeText(text, size / 2, size * 0.54); x.fillText(text, size / 2, size * 0.54);
+  return texCache[key] = t;
+}
+
+/* ================= ARENA (static) ================= */
+{
+  // Studio floor: deep navy with faint range rings and a tri-colour boundary, one arc per corner
+  const { x, t } = canvasTex(1024, 1024), C = 512;
+  const g = x.createRadialGradient(C, C, 40, C, C, 512); g.addColorStop(0, "#1c2748"); g.addColorStop(0.7, "#111a33"); g.addColorStop(1, "#0b1122");
+  x.fillStyle = g; x.fillRect(0, 0, 1024, 1024);
+  x.strokeStyle = "rgba(243,245,250,.07)"; x.lineWidth = 2;
+  for (let r = 70; r < 470; r += 66) { x.beginPath(); x.arc(C, C, r, 0, Math.PI * 2); x.stroke(); }
+  for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; x.beginPath(); x.moveTo(C + Math.cos(a) * 400, C + Math.sin(a) * 400); x.lineTo(C + Math.cos(a) * 452, C + Math.sin(a) * 452); x.stroke(); }
+  x.lineWidth = 9; x.lineCap = "butt";
+  ["#34c46b", "#ffb020", "#3d8bff"].forEach((c, i) => { const a0 = -Math.PI / 2 - Math.PI / 3 + i * Math.PI * 2 / 3; x.strokeStyle = c; x.beginPath(); x.arc(C, C, 474, a0 + 0.02, a0 + Math.PI * 2 / 3 - 0.02); x.stroke(); });
+  x.strokeStyle = "rgba(243,245,250,.16)"; x.lineWidth = 3; x.beginPath(); x.arc(C, C, 40, 0, Math.PI * 2); x.moveTo(C - 64, C); x.lineTo(C + 64, C); x.moveTo(C, C - 64); x.lineTo(C, C + 64); x.stroke();
+  const floor = mesh(new THREE.CylinderGeometry(15, 15.6, 0.8, 96), [mat(0x0b1020), new THREE.MeshStandardMaterial({ map: t, roughness: 0.82, metalness: 0 }), mat(0x0b1020)], false);
+  floor.position.y = -0.4; scene.add(floor);
+  const lip = mesh(new THREE.TorusGeometry(15.05, 0.08, 8, 96), new THREE.MeshStandardMaterial({ color: 0xf3f5fa, emissive: 0xf3f5fa, emissiveIntensity: 0.35 }), false);
+  lip.rotation.x = Math.PI / 2; lip.position.y = 0.02; scene.add(lip);
+}
+const STAND_GAP = 0.75;
+{
+  const pts = [[18.5, -0.4], [18.5, 0.6], [20.3, 0.6], [20.3, 1.5], [22.1, 1.5], [22.1, 2.4], [23.9, 2.4], [23.9, 3.3], [26, 3.3], [26, -0.4]].map(([r, y]) => new THREE.Vector2(r, y));
+  scene.add(mesh(new THREE.LatheGeometry(pts, 80, STAND_GAP, Math.PI * 2 - STAND_GAP * 2), mat(0x1c2440, { side: THREE.DoubleSide })));
+}
+const CROWD_COLORS = [0x3d8bff, 0x34c46b, 0xffb020, 0xf3f5fa, 0x2a3558, 0xe0261c, 0x3d8bff, 0x34c46b, 0xffb020, 0x5a6585];
+const crowdSeats = [];
+for (let tier = 0; tier < 4; tier++) {
+  const r = 19.4 + tier * 1.8, y = 0.6 + tier * 0.9;
+  for (let a = STAND_GAP + 0.06; a < Math.PI * 2 - STAND_GAP - 0.06; a += 1.36 / r) crowdSeats.push({ r: r + (Math.random() - .5) * .3, y, a, ph: Math.random() * 10 });
+}
+const crowd = new THREE.InstancedMesh(new THREE.BoxGeometry(0.5, 0.75, 0.3), new THREE.MeshStandardMaterial({ roughness: 0.6 }), crowdSeats.length);
+crowd.castShadow = true;
+crowdSeats.forEach((s, i) => crowd.setColorAt(i, new THREE.Color(CROWD_COLORS[i % CROWD_COLORS.length])));
+scene.add(crowd);
+let cheer = 0;
+const dummy = new THREE.Object3D();
+function updateCrowd(now, dt) {
+  cheer = Math.max(0.12, cheer - dt * 0.5);
+  crowdSeats.forEach((s, i) => {
+    dummy.position.set(Math.sin(s.a) * s.r, s.y + 0.38 + Math.max(0, Math.sin(now * 0.008 + s.ph)) * cheer * 0.8, Math.cos(s.a) * s.r);
+    dummy.rotation.set(0, s.a + Math.PI, Math.sin(now * 0.006 + s.ph) * cheer * 0.3);
+    dummy.updateMatrix(); crowd.setMatrixAt(i, dummy.matrix);
+  });
+  crowd.instanceMatrix.needsUpdate = true;
+}
+for (const a of [1.3, -1.3, 2.6, -2.6]) {
+  const g = new THREE.Group(), pole = mesh(new THREE.CylinderGeometry(0.2, 0.3, 14, 6), mat(0x3a3f4c));
+  pole.position.y = 7; const head = mesh(new THREE.BoxGeometry(2.4, 1.2, 0.6), mat(0xfff6d8, { emissive: 0xfff6d8, emissiveIntensity: 1 }), false);
+  head.position.y = 14; g.add(pole, head); g.position.set(Math.sin(a) * 27.5, 0, Math.cos(a) * 27.5); g.lookAt(0, 0, 0); scene.add(g);
+}
+const jumbo = canvasTex(1024, 320);
+{
+  const frame = mesh(new THREE.BoxGeometry(17, 5.9, 0.6), mat(0x23283a)); frame.position.set(0, 10.5, -27.5);
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(16.2, 5.06), new THREE.MeshBasicMaterial({ map: jumbo.t, toneMapped: false }));
+  screen.position.set(0, 10.5, -27.18);
+  const leg = mesh(new THREE.BoxGeometry(0.6, 8, 0.6), mat(0x23283a)); leg.position.set(0, 4, -27.6);
+  scene.add(frame, screen, leg);
+}
+function setJumbo(top, title, sub, titleFamily) {
+  const { x } = jumbo;
+  x.fillStyle = "#0b1122"; x.fillRect(0, 0, 1024, 320);
+  x.fillStyle = "#3d8bff"; x.fillRect(0, 0, 341, 8); x.fillStyle = "#34c46b"; x.fillRect(341, 0, 342, 8); x.fillStyle = "#ffb020"; x.fillRect(683, 0, 341, 8);
+  x.textAlign = "center"; x.textBaseline = "alphabetic";
+  if ("fontStretch" in x) x.fontStretch = "condensed";
+  x.fillStyle = "#a3acc2"; x.font = `700 32px "Archivo", sans-serif`; if ("letterSpacing" in x) x.letterSpacing = "4px"; x.fillText(top.toUpperCase(), 512, 70);
+  if ("letterSpacing" in x) x.letterSpacing = "0px";
+  const family = titleFamily || `"Archivo", sans-serif`, t = titleFamily ? title : title.toUpperCase();
+  x.fillStyle = "#ffffff"; const px = fitPx(x, t, 800, family, 940, 124); x.font = `800 ${px}px ${family}`; x.fillText(t, 512, 206);
+  x.fillStyle = "#ffb020"; x.font = `600 34px "Archivo", sans-serif`; x.fillText(sub || "", 512, 280);
+  if ("fontStretch" in x) x.fontStretch = "normal";
+  jumbo.t.needsUpdate = true;
+}
+
+/* ================= GAME TIME (hit-stop and slow motion) ================= */
+let timeScale = 1, rush = false;
+const tweens = [];
+function gtween(ms, fn) { return new Promise(res => { fn(0); tweens.push({ t: 0, ms, fn, res }); }); }
+function stepTweens(gms) {
+  for (let i = tweens.length - 1; i >= 0; i--) {
+    const tw = tweens[i]; tw.t = Math.min(tw.ms, tw.t + gms); tw.fn(tw.t / tw.ms);
+    if (tw.t >= tw.ms) { tweens.splice(i, 1); tw.res(); }
+  }
+}
+// Reading pauses; pressing Next while busy hurries the rest of the round.
+const wait = ms => sleep(rush ? Math.min(ms, 180) : ms);
+async function hitStop(ms) { if (RM) return; timeScale = 0; await sleep(ms); timeScale = 1; }
+function slowMo(scale, ms) { if (RM) return; timeScale = scale; setTimeout(() => { if (timeScale === scale) timeScale = 1; }, ms); }
+
+/* ================= CHARACTERS ================= */
+const stage = new THREE.Group(); scene.add(stage);
+// Middle podium sits further back so side-to-side attacks have a clear lane in front of it
+const HOME = [new THREE.Vector3(-5.2, 0, 1.2), new THREE.Vector3(0, 0, -2.6), new THREE.Vector3(5.2, 0, 1.2)];
+const CENTER = new THREE.Vector3(0, 0, 2.2);
+const INK = 0x16181d;
+
+// A vinyl-toy build: rounded body in the corner colour, an ink outline, a paper face panel, jointed arms.
+// Body proportions come from the font's real metadata: width, stroke thickness, slant.
+const smooth = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.03, ...extra });
+const OUTLINE = new THREE.MeshBasicMaterial({ color: INK, side: THREE.BackSide });
+const LEG_H = 0.5, PODIUM_TOP = 0.73, LYING = 0.4; // LYING: body half-depth, so a knocked-out fighter rests on a surface, not in it
+function roundedBox(W, H, D, r, slant) {
+  const b = 0.07, w = W - b * 2, h = H - b * 2, x = -w / 2, y = -h / 2, s = new THREE.Shape();
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r); s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r); s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  const g = new THREE.ExtrudeGeometry(s, { depth: D - b * 2, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 5, curveSegments: 10 });
+  g.translate(0, 0, -(D - b * 2) / 2);
+  if (slant) g.applyMatrix4(shearX(slant));
+  g.computeVertexNormals();
+  return g;
+}
+const shearX = k => new THREE.Matrix4().set(1, k, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+// Ink outline: the same shape, slightly larger, drawn inside-out
+function outlined(geo, material, grow = 1.05) {
+  const g = new THREE.Group(), m = mesh(geo, material), o = new THREE.Mesh(geo, OUTLINE);
+  o.scale.setScalar(grow); g.add(o, m); g.userData.main = m; return g;
+}
+function buildCharacter(ch) {
+  const W = 1.4 + ((ch.width || 6) - 6) * 0.07, tall = ch.cat === "Display" || (ch.width && ch.width <= 4);
+  const H = tall ? 2.2 : 1.85, D = 0.7 + ((ch.thick || 5) - 5) * 0.05, slant = ch.cat === "Hand" ? 0.18 : 0;
+  const root = new THREE.Group(), rig = new THREE.Group(), body = new THREE.Group(), torso = new THREE.Group();
+  const lift = new THREE.Group(); lift.position.y = PODIUM_TOP;
+  root.add(lift); lift.add(rig); rig.add(body);
+  const mono = ch.cat === "Mono";
+  const skin = smooth(mono ? 0x1b2333 : ch.color), dark = smooth(INK, { roughness: 0.6 }), glove = smooth(0xfaf7ef, { roughness: 0.55 }), trim = smooth(ch.color, { emissive: ch.color, emissiveIntensity: 0.25 });
+  const topY = LEG_H + H, lean = y => slant * (y - (LEG_H + H / 2)); // x offset of the slanted body at height y
+
+  // Torso: rounded slab + outline + face panel
+  const shell = outlined(roundedBox(W, H, D, 0.2, slant), skin, 1.045);
+  const face = canvasTex(512, Math.round(512 * H / W));
+  const faceMat = new THREE.MeshStandardMaterial({ map: face.t, transparent: true, roughness: 0.75 });
+  const panelGeo = new THREE.PlaneGeometry(W * 0.84, H * 0.84); if (slant) panelGeo.applyMatrix4(shearX(slant));
+  const panel = new THREE.Mesh(panelGeo, faceMat); panel.position.z = D / 2 + 0.012; panel.receiveShadow = false;
+  torso.add(shell, panel); torso.position.y = LEG_H + H / 2; body.add(torso);
+  shell.userData.main.receiveShadow = false;
+
+  // Legs with rounded shoes
+  const legs = [];
+  for (const sx of [-1, 1]) {
+    const leg = new THREE.Group(); leg.position.set(sx * W * 0.24 + lean(LEG_H), LEG_H + 0.04, 0);
+    const shin = mesh(new THREE.CylinderGeometry(0.1, 0.085, 0.4, 10), dark); shin.position.y = -0.2;
+    const shoe = outlined(new THREE.SphereGeometry(0.27, 16, 12), ch.cat === "Serif" ? trim : glove, 1.07);
+    shoe.scale.set(ch.cat === "Serif" ? 1.35 : 1, 0.55, 1.5); shoe.position.set(0, -0.4, 0.1);
+    leg.add(shin, shoe); body.add(leg); legs.push(leg);
+  }
+
+  // Jointed arms: shoulder -> elbow -> mitten
+  const arms = [];
+  for (const sx of [-1, 1]) {
+    const yS = LEG_H + H * 0.6, sh = new THREE.Group(), el = new THREE.Group();
+    sh.position.set(sx * (W / 2 - 0.02) + lean(yS), yS, 0);
+    const upperGeo = new THREE.CylinderGeometry(0.09, 0.085, 0.42, 10); upperGeo.translate(0, -0.21, 0);
+    const foreGeo = new THREE.CylinderGeometry(0.085, 0.075, 0.38, 10); foreGeo.translate(0, -0.19, 0);
+    const elbow = mesh(new THREE.SphereGeometry(0.095, 10, 8), dark);
+    const cuff = mesh(new THREE.TorusGeometry(0.1, 0.045, 8, 16), trim, false); cuff.rotation.x = Math.PI / 2; cuff.position.y = -0.36;
+    const hand = outlined(new THREE.SphereGeometry(0.2, 16, 12), glove, 1.08); hand.scale.set(1, 0.95, 0.85); hand.position.y = -0.52;
+    const thumb = mesh(new THREE.SphereGeometry(0.085, 10, 8), glove); thumb.position.set(-sx * 0.15, -0.46, 0.08);
+    el.position.y = -0.42; el.add(elbow, mesh(foreGeo, dark), cuff, hand, thumb);
+    sh.add(mesh(upperGeo, dark), el); body.add(sh);
+    arms.push({ sh, el, sx, cur: [sx * 0.4, 0, -0.3] });
+  }
+
+  // Category accessories
+  const extras = {}, headX = lean(topY);
+  if (ch.cat === "Serif") { // top hat
+    const hat = new THREE.Group();
+    const brim = outlined(new THREE.CylinderGeometry(0.66, 0.66, 0.07, 28), dark, 1.04), crown = outlined(new THREE.CylinderGeometry(0.42, 0.45, 0.66, 28), dark, 1.04), band = mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.13, 28), trim, false);
+    brim.position.y = 0.03; crown.position.y = 0.38; band.position.y = 0.14; hat.add(brim, crown, band);
+    hat.position.set(headX, topY, 0); hat.rotation.z = -0.08; body.add(hat);
+  }
+  if (ch.cat === "Sans") {
+    const ant = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.55, 8), dark); ant.position.set(headX, topY + 0.27, 0);
+    const tip = mesh(new THREE.SphereGeometry(0.15, 16, 12), smooth(ch.color, { emissive: ch.color, emissiveIntensity: 0.9 }), false); tip.position.set(headX, topY + 0.62, 0);
+    body.add(ant, tip); extras.tip = tip;
+  }
+  if (mono) {
+    const cur = mesh(new THREE.BoxGeometry(0.18, 0.5, 0.18), smooth(0x7cfc9a, { emissive: 0x7cfc9a, emissiveIntensity: 1 }), false); cur.position.set(0, topY + 0.32, 0); body.add(cur); extras.cursor = cur;
+    for (const sx of [-1, 1]) { const vent = mesh(new THREE.BoxGeometry(0.04, H * 0.5, D * 0.5), trim, false); vent.position.set(sx * (W / 2 + 0.005), LEG_H + H / 2, 0); body.add(vent); }
+  }
+  if (ch.cat === "Display") {
+    const crown = new THREE.Group(), gold = smooth(0xf2c14e, { metalness: 0.55, roughness: 0.3 });
+    const ring = mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.22, 24, 1, true), gold); ring.material.side = THREE.DoubleSide; ring.position.y = 0.11; crown.add(ring);
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, s = mesh(new THREE.ConeGeometry(0.12, 0.34, 12), gold), gem = mesh(new THREE.SphereGeometry(0.05, 8, 6), trim, false); s.position.set(Math.sin(a) * 0.45, 0.38, Math.cos(a) * 0.45); gem.position.set(Math.sin(a) * 0.5, 0.12, Math.cos(a) * 0.5); crown.add(s, gem); }
+    crown.position.y = topY - 0.02; body.add(crown);
+    const cape = mesh(new THREE.PlaneGeometry(W * 1.1, H * 0.95, 4, 8), smooth(new THREE.Color(ch.color).multiplyScalar(0.55), { side: THREE.DoubleSide, roughness: 0.7 }));
+    cape.position.set(0, LEG_H + H * 0.5, -D / 2 - 0.06); body.add(cape); extras.cape = cape; extras.capeBase = cape.geometry.attributes.position.array.slice();
+  }
+  if (ch.cat === "Hand") {
+    const scarf = mesh(new THREE.TorusGeometry(W * 0.44, 0.12, 10, 24), glove); scarf.rotation.x = Math.PI / 2; scarf.scale.y = (D + 0.2) / (W * 0.88); scarf.position.set(lean(topY - 0.25), topY - 0.25, 0); body.add(scarf);
+    const tail = mesh(new THREE.BoxGeometry(0.22, 0.6, 0.06), glove); tail.position.set(lean(topY - 0.5) + W * 0.3, topY - 0.55, D / 2 + 0.08); tail.rotation.z = 0.2; body.add(tail);
+    const quill = mesh(new THREE.ConeGeometry(0.1, 1, 8), glove); quill.position.set(headX + W * 0.32, topY + 0.38, -0.1); quill.rotation.z = -0.6; body.add(quill);
+  }
+
+  // Name label floating above, set in the font itself
+  const lab = canvasTex(512, 128);
+  lab.x.font = `700 ${fitPx(lab.x, ch.name, 700, fam(ch), 470, 70)}px ${fam(ch)}`; lab.x.textAlign = "center"; lab.x.textBaseline = "middle";
+  lab.x.lineWidth = 10; lab.x.strokeStyle = "#070a14"; lab.x.lineJoin = "round"; lab.x.strokeText(ch.name, 256, 66); lab.x.fillStyle = "#f3f5fa"; lab.x.fillText(ch.name, 256, 66);
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: lab.t, transparent: true, depthWrite: false }));
+  label.scale.set(3, 0.75, 1); label.position.y = PODIUM_TOP + topY + 1.3; root.add(label);
+  // Contact shadow
+  const blob = new THREE.Mesh(new THREE.CircleGeometry(W * 0.7, 24), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.y = PODIUM_TOP + 0.03; root.add(blob);
+  Object.assign(ch, { root, lift, blob, rig, body, torso, arms, legs, face, faceMat, label, extras, H: topY, W, flashMats: [skin, faceMat],
+    mood: "idle", blink: false, mouthOpen: false, talking: false, t: Math.random() * 10, nextBlink: 1 + Math.random() * 3, yaw: 0, lookAt: null, punch: 0, stars: null });
+  drawFace(ch);
+  return root;
+}
+
+function drawFace(ch) {
+  const { x, c, t } = ch.face, W = c.width, H = c.height, mono = ch.cat === "Mono";
+  const ink = mono ? "#7cfc9a" : "#16181d", bg = mono ? "#0c1f15" : "#fffefa";
+  x.clearRect(0, 0, W, H);
+  rr(x, 6, 6, W - 12, H - 12, 46); x.fillStyle = bg; x.fill();
+  x.lineWidth = 10; x.strokeStyle = mono ? "#1d3a2a" : "#16181d"; x.stroke();
+  const ey = H * 0.22, ex = [W * 0.31, W * 0.69], r = W * 0.095, my = H * 0.39, look = ch.lookX || 0;
+  x.lineCap = "round"; x.lineJoin = "round"; x.lineWidth = 13; x.strokeStyle = ink; x.fillStyle = ink;
+  const mood = ch.mood, closed = ch.blink && !["ko", "happy", "hurt"].includes(mood);
+  if (mood === "happy" && !mono) { x.fillStyle = "rgba(255,120,130,.45)"; for (const cx of ex) { x.beginPath(); x.ellipse(cx + (cx < W / 2 ? -r * 0.9 : r * 0.9), ey + r * 1.5, r * 0.7, r * 0.42, 0, 0, Math.PI * 2); x.fill(); } x.fillStyle = ink; }
+  for (const [i, cx] of ex.entries()) {
+    const s = i ? 1 : -1;
+    if (mood === "ko") { x.beginPath(); x.moveTo(cx - r, ey - r); x.lineTo(cx + r, ey + r); x.moveTo(cx + r, ey - r); x.lineTo(cx - r, ey + r); x.stroke(); continue; }
+    if (mood === "happy") { x.beginPath(); x.arc(cx, ey + r * 0.45, r, Math.PI * 1.12, Math.PI * 1.88); x.stroke(); continue; }
+    if (mood === "hurt") { x.beginPath(); x.moveTo(cx - s * r, ey - r * 0.7); x.lineTo(cx + s * r * 0.6, ey); x.lineTo(cx - s * r, ey + r * 0.7); x.stroke(); continue; }
+    if (closed) { x.beginPath(); x.moveTo(cx - r, ey); x.quadraticCurveTo(cx, ey + r * 0.35, cx + r, ey); x.stroke(); continue; }
+    if (mono) { rr(x, cx - r * 0.7, ey - r, r * 1.4, r * 2, 8); x.fill(); }
+    else {
+      x.beginPath(); x.arc(cx, ey, r, 0, Math.PI * 2); x.fillStyle = "#fff"; x.fill(); x.stroke();
+      const px = cx + look * r * 0.4, py = ey + r * 0.08;
+      x.beginPath(); x.arc(px, py, r * 0.52, 0, Math.PI * 2); x.fillStyle = ink; x.fill();
+      x.beginPath(); x.arc(px - r * 0.18, py - r * 0.2, r * 0.16, 0, Math.PI * 2); x.fillStyle = "#fff"; x.fill(); // catchlight
+      if (mood === "smug" || mood === "angry") { x.fillStyle = bg; x.beginPath(); if (mood === "smug") x.rect(cx - r - 9, ey - r - 9, r * 2 + 18, r * 0.95); else { x.moveTo(cx - r - 9, ey - r - 9); x.lineTo(cx + r + 9, ey - r - 9); x.lineTo(cx + r + 9, ey - r * (s > 0 ? 0.75 : 0.05)); x.lineTo(cx - r - 9, ey - r * (s > 0 ? 0.05 : 0.75)); } x.fill();
+        x.beginPath(); if (mood === "smug") { x.moveTo(cx - r, ey - r * 0.12); x.lineTo(cx + r, ey - r * 0.12); } else { x.moveTo(cx - r, ey - r * (s > 0 ? 0.05 : 0.75)); x.lineTo(cx + r, ey - r * (s > 0 ? 0.75 : 0.05)); } x.stroke(); }
+    }
+    x.fillStyle = ink;
+    x.beginPath(); // brows
+    if (mood === "angry") { x.moveTo(cx - s * r * 1.15, ey - r * 1.75); x.lineTo(cx + s * r * 0.9, ey - r * 1.2); }
+    else if (mood === "smug" && i === 1) { x.moveTo(cx - r, ey - r * 1.95); x.quadraticCurveTo(cx, ey - r * 2.45, cx + r, ey - r * 1.85); }
+    else { x.moveTo(cx - r * 0.9, ey - r * 1.6); x.quadraticCurveTo(cx, ey - r * 1.9, cx + r * 0.9, ey - r * 1.6); }
+    x.stroke();
+  }
+  x.beginPath();
+  const mw = W * 0.15;
+  if (mood === "ko") { x.moveTo(W / 2 - mw, my); for (let i = 0; i <= 6; i++) x.lineTo(W / 2 - mw + i * mw / 3, my + (i % 2 ? 11 : -11)); x.stroke(); }
+  else if (mood === "happy") { x.moveTo(W / 2 - mw * 1.3, my - 14); x.quadraticCurveTo(W / 2, my + 66, W / 2 + mw * 1.3, my - 14); x.closePath(); x.fill(); if (!mono) { x.fillStyle = "#ff7a85"; x.beginPath(); x.ellipse(W / 2, my + 20, mw * 0.5, 10, 0, 0, Math.PI * 2); x.fill(); x.fillStyle = ink; } }
+  else if (mood === "hurt") { x.ellipse(W / 2, my + 8, mw * 0.5, 24, 0, 0, Math.PI * 2); x.fill(); }
+  else if (mood === "angry") { rr(x, W / 2 - mw, my - 16, mw * 2, 36, 9); x.fillStyle = mono ? bg : "#fff"; x.fill(); x.stroke(); x.beginPath(); x.moveTo(W / 2 - mw, my + 2); x.lineTo(W / 2 + mw, my + 2); for (const k of [-0.5, 0, 0.5]) { x.moveTo(W / 2 + mw * k, my - 16); x.lineTo(W / 2 + mw * k, my + 20); } x.stroke(); }
+  else if (ch.mouthOpen) { x.ellipse(W / 2, my + 6, mw * 0.55, 26, 0, 0, Math.PI * 2); x.fill(); }
+  else if (mood === "smug") { x.moveTo(W / 2 - mw, my + 6); x.quadraticCurveTo(W / 2 + mw * 0.3, my + 24, W / 2 + mw, my - 12); x.stroke(); }
+  else { x.moveTo(W / 2 - mw * 0.8, my); x.quadraticCurveTo(W / 2, my + 28, W / 2 + mw * 0.8, my); x.stroke(); }
+  // The font's own "Aa" is the belly
+  x.fillStyle = ink; x.textAlign = "center"; x.textBaseline = "middle";
+  const px = Math.min(fitPx(x, "Aa", 400, fam(ch), W * 0.74, 400), H * 0.44);
+  x.font = `400 ${px}px ${fam(ch)}`; x.fillText("Aa", W / 2, H * 0.72);
+  t.needsUpdate = true;
+}
+const setMood = (ch, m) => { if (ch.mood !== m) { ch.mood = m; drawFace(ch); } };
+
+// Arm poses as [swing out, swing forward, elbow bend] for the left and right arm
+function armPose(ch, arm, now) {
+  const s = arm.sx, right = s > 0, w = Math.sin(ch.t * 2 + (right ? 1.4 : 0));
+  if (ch.punch > 0 && right) return [0.25, -1.55 * ch.punch, -0.15];
+  if (ch.punch < 0 && right) return [0.5, 0.9 * -ch.punch, -1.7]; // wind-up
+  switch (ch.mood) {
+    case "happy": return [s * (2.55 + Math.sin(ch.t * 11 + (right ? 0 : 1.5)) * 0.28), 0, -0.35];
+    case "angry": return [s * 0.55, -0.7, -1.75];
+    case "hurt": return [s * 1.5, 0.5, -0.5];
+    case "ko": return [s * 1.35, 0.2, -0.2];
+    case "smug": return right ? [0.25, -0.35, -2.0] : [-0.9, 0.15, -1.5]; // one hand on the hip
+  }
+  if (ch.talking && right) return [0.75, -0.75 + Math.sin(now * 0.011) * 0.3, -1.25 + Math.sin(now * 0.017) * 0.35];
+  return [s * (0.38 + w * 0.05), w * 0.06, -0.3];
+}
+function animateCharacter(ch, gdt, now) {
+  ch.t += gdt;
+  const k = Math.min(1, gdt * 12);
+  for (const arm of ch.arms) {
+    const target = armPose(ch, arm, now);
+    for (let i = 0; i < 3; i++) arm.cur[i] += (target[i] - arm.cur[i]) * (ch.punch ? 1 : k);
+    arm.sh.rotation.set(arm.cur[1], 0, arm.cur[0]); arm.el.rotation.x = arm.cur[2];
+  }
+  if (ch.mood !== "ko") {
+    const cheering = ch.mood === "happy";
+    ch.body.position.y = Math.sin(ch.t * 2.2) * 0.03 + (cheering ? Math.abs(Math.sin(ch.t * 8)) * 0.4 : 0);
+    ch.torso.scale.y = (ch.torso.userData.sy || 1) * (1 + Math.sin(ch.t * 2.2) * 0.015);
+    ch.torso.rotation.z = cheering ? Math.sin(ch.t * 8) * 0.06 : ch.talking ? Math.sin(now * 0.008) * 0.03 : 0;
+    ch.legs.forEach((l, i) => l.rotation.x = cheering ? Math.sin(ch.t * 8 + i * Math.PI) * 0.35 : 0);
+    ch.nextBlink -= gdt;
+    if (ch.nextBlink <= 0) { if (!ch.blink) { ch.blink = true; ch.nextBlink = 0.12; } else { ch.blink = false; ch.nextBlink = 2 + Math.random() * 3; } drawFace(ch); }
+    if (ch.talking) { const open = Math.floor(now / 110) % 2 === 0; if (open !== ch.mouthOpen) { ch.mouthOpen = open; drawFace(ch); } }
+    else if (ch.mouthOpen) { ch.mouthOpen = false; drawFace(ch); }
+    // turn toward whoever we're looking at, or back to the audience
+    if (ch.lookAt && !ch.lockYaw) { const p = ch.lookAt.root ? ch.lookAt.root.position : ch.lookAt; ch.yaw = Math.atan2(p.x - ch.root.position.x, p.z - ch.root.position.z); }
+    else if (!ch.lookAt && ch.homeYaw != null) ch.yaw = ch.homeYaw;
+    if (!ch.lockYaw) { let d = ch.yaw - ch.root.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); ch.root.rotation.y += d * Math.min(1, gdt * 6); }
+  }
+  if (ch.extras.tip) ch.extras.tip.material.emissiveIntensity = 0.6 + Math.sin(ch.t * 4) * 0.4;
+  if (ch.extras.cursor) ch.extras.cursor.visible = Math.floor(now / 500) % 2 === 0;
+  if (ch.extras.cape) { const a = ch.extras.cape.geometry.attributes.position, b = ch.extras.capeBase, h = ch.H - LEG_H; for (let i = 0; i < a.count; i++) { const y = b[i * 3 + 1]; a.array[i * 3 + 2] = b[i * 3 + 2] - (0.5 - y / h) * 0.3 * (1 + Math.sin(ch.t * 3 + y * 3 + b[i * 3] * 2) * 0.35); } a.needsUpdate = true; }
+  if (ch.stars) ch.stars.forEach((s, i) => { const a = now * 0.004 + i * 2.1; s.position.set(Math.sin(a) * 0.8, 1.9, Math.cos(a) * 0.8); });
+}
+
+/* ================= EFFECTS ================= */
+const sprites = [];
+function spriteFx(map, pos, scale, data) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false })); s.position.copy(pos); s.scale.setScalar(scale); s.userData = data; scene.add(s); sprites.push(s); return s; }
+function debris(at, att, n = 14) {
+  const letters = (state.name.replace(/\s/g, "") || "Aa") + "Aa&?!";
+  for (let i = 0; i < n; i++) spriteFx(glyphTexture(att.name, letters[i % letters.length], i % 3 ? att.color : "#fffefa"), at.clone().setY(at.y + 1.6 + Math.random()), 0.7 + Math.random() * 0.5,
+    { v: new THREE.Vector3((Math.random() - .5) * 9, Math.random() * 7 + 3, (Math.random() - .5) * 9), life: 1.1, g: 16, spin: (Math.random() - .5) * 10 });
+}
+function damageNumber(at, dmg) {
+  const { x, t } = canvasTex(256, 128);
+  if ("fontStretch" in x) x.fontStretch = "condensed";
+  x.font = `900 100px "Archivo", sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.lineJoin = "round";
+  x.lineWidth = 14; x.strokeStyle = "#070a14"; x.strokeText("−" + dmg, 128, 66); x.fillStyle = "#ff4a3d"; x.fillText("−" + dmg, 128, 66);
+  const s = spriteFx(t, at.clone().setY(at.y + 3.4), 1, { v: new THREE.Vector3(0, 1.6, 0), life: 1.3, g: 0 }); s.scale.set(2.2, 1.1, 1);
+}
+function shockwave(at, color) {
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.8, 1.05, 40), new THREE.MeshBasicMaterial({ color, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2; ring.position.copy(at).setY(0.78); scene.add(ring);
+  gtween(500, t => { ring.scale.setScalar(0.4 + easeOut(t) * 4.5); ring.material.opacity = 1 - t; }).then(() => scene.remove(ring));
+}
+const STAR_TEX = (() => { const { x, t } = canvasTex(64, 64); x.translate(32, 32); x.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 12 : 28, a = i * Math.PI / 5 - Math.PI / 2; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); } x.closePath(); x.fillStyle = "#f2c14e"; x.fill(); x.lineWidth = 4; x.strokeStyle = "#16181d"; x.stroke(); return t; })();
+function addStars(ch) { ch.stars = [0, 1, 2].map(() => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: STAR_TEX, transparent: true, depthWrite: false })); s.scale.setScalar(0.45); ch.root.add(s); return s; }); }
+function confetti(f) {
+  const cols = ["#2f7fd0", "#d0106f", "#d4950f", "#3f9d48", "#fffefa"];
+  for (let i = 0; i < 160; i++) spriteFx(glyphTexture(f.name, "Aa&gR?!"[i % 7], cols[i % cols.length]), new THREE.Vector3((Math.random() - .5) * 24, 12 + Math.random() * 12, (Math.random() - .5) * 18), 0.6 + Math.random() * 0.6,
+    { v: new THREE.Vector3((Math.random() - .5) * 1.5, -2 - Math.random() * 2, 0), life: 7, g: 0, spin: (Math.random() - .5) * 4 });
+}
+function updateSprites(gdt) {
+  for (let i = sprites.length - 1; i >= 0; i--) {
+    const s = sprites[i], u = s.userData;
+    u.v.y -= u.g * gdt; s.position.addScaledVector(u.v, gdt); u.life -= gdt;
+    if (u.spin) s.material.rotation += u.spin * gdt;
+    s.material.opacity = Math.min(1, u.life * 2);
+    if (u.life <= 0) { scene.remove(s); s.material.dispose(); sprites.splice(i, 1); }
+  }
+}
+async function flashScreen(strength = 0.85) { if (RM) return; const f = $("flash"); f.style.transition = "none"; f.style.opacity = strength; await sleep(40); f.style.transition = "opacity .35s"; f.style.opacity = 0; }
+const letterbox = on => document.body.classList.toggle("cine", on && !RM);
+
+/* ================= CAMERA ================= */
+// Camera moves are timed in real milliseconds, so they land on schedule no matter the frame rate.
+const cam = { pos: new THREE.Vector3(0, 9, 22), look: new THREE.Vector3(0, 2, 0), curLook: new THREE.Vector3(0, 2, 0), fromPos: new THREE.Vector3(), fromLook: new THREE.Vector3(), t0: 0, dur: 0, orbit: null, shake: 0, fov: 50 };
+const showLabels = on => state?.fighters?.forEach(f => f.label && (f.label.visible = on));
+function shot(pos, look, { cut = false, fov = 50, dur = 650, labels = false } = {}) {
+  cam.orbit = null; cam.fromPos.copy(camera.position); cam.fromLook.copy(cam.curLook);
+  cam.pos.copy(pos); cam.look.copy(look); cam.fov = fov; cam.t0 = performance.now(); cam.dur = cut || RM ? 0 : dur;
+  showLabels(labels);
+  return cam.dur;
+}
+// Resolves when the current camera move has landed
+const camArrived = () => sleep(Math.max(0, cam.t0 + cam.dur - performance.now()) + 60);
+const shotWide = (o = {}) => shot(new THREE.Vector3(0, 6, 15.5), new THREE.Vector3(0, 2.8, -0.2), { labels: true, ...o });
+const shotLineup = () => shot(new THREE.Vector3(0, 5, 13), new THREE.Vector3(0, 2.6, -0.4), { labels: true, dur: 900 });
+// Medium shot: the speaker fills the middle, with a hint of the neighbours for context
+// Close enough that the neighbours fall outside the frame instead of looming in the foreground
+function shotOn(ch, o = {}) { const p = ch.root.position; return shot(new THREE.Vector3(p.x * 0.92, 4, p.z + 6.6), new THREE.Vector3(p.x, 2.7, p.z), { fov: 40, ...o }); }
+// Attack shots always film from the open front of the arena, never through the third fighter
+const frontSide = dir => { const side = new THREE.Vector3(-dir.z, 0, dir.x); return side.z < 0 ? side.negate() : side; };
+function shotOverShoulder(att, def) {
+  const a = att.root.position, d = def.root.position, dir = d.clone().sub(a).setY(0).normalize(), side = frontSide(dir);
+  shot(a.clone().addScaledVector(dir, -4.4).addScaledVector(side, 3).setY(4), d.clone().setY(2.5), { cut: true, fov: 46 });
+}
+function shotImpact(def, att) {
+  const d = def.root.position, dir = d.clone().sub(att.root.position).setY(0).normalize(), side = frontSide(dir);
+  shot(d.clone().addScaledVector(side, 5.2).addScaledVector(dir, 1.2).setY(3), d.clone().setY(2.4), { cut: true, fov: RM ? 50 : 36 });
+}
+function updateCamera(dt, now) {
+  if (cam.orbit) {
+    const o = cam.orbit; o.a += dt * o.speed; const a = o.sway ? Math.sin(o.a) * o.sway : o.a;
+    cam.pos.set(o.at.x + Math.sin(a) * o.r, o.h, o.at.z + Math.cos(a) * o.r); cam.look.copy(o.at).setY(o.lookY);
+    const k = Math.min(1, dt * 3); camera.position.lerp(cam.pos, k); cam.curLook.lerp(cam.look, k);
+  } else {
+    const t = cam.dur ? Math.min(1, (now - cam.t0) / cam.dur) : 1, k = ease(t);
+    camera.position.lerpVectors(cam.fromPos, cam.pos, k); cam.curLook.lerpVectors(cam.fromLook, cam.look, k);
+  }
+  // Shots are composed for widescreen; on narrow screens widen the vertical FOV so all three fighters still fit.
+  // Panels also eat height, so zoom out until the shot fits the uncovered part of the screen.
+  const BASE_ASPECT = 1.6, widen = Math.max(1, BASE_ASPECT / camera.aspect) / Math.sqrt(freeFrac);
+  const want = Math.min(110, 2 * Math.atan(Math.tan(cam.fov * Math.PI / 360) * widen) * 180 / Math.PI);
+  if (Math.abs(camera.fov - want) > 0.05) { camera.fov += (want - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix(); }
+  cam.shake = Math.max(0, cam.shake - dt * 2.2);
+  if (cam.shake && !RM) camera.position.add(new THREE.Vector3((Math.random() - .5) * cam.shake, (Math.random() - .5) * cam.shake, (Math.random() - .5) * cam.shake * 0.5));
+  camera.lookAt(cam.curLook);
+}
+
+/* ================= STATE ================= */
+let state = null, busy = false, screen = "welcome";
+const tonesOn = new Set(), usesOn = new Set(["ui", "head"]), userTouched = new Set();
+let autoTones = new Set();
+const criteriaNow = () => [...[...tonesOn].map(key => ({ kind: "tone", key })), ...[...usesOn].map(key => ({ kind: "use", key }))];
+
+function showScreen(name) {
+  screen = name;
+  const map = { welcome: ["welcome"], brief: ["brief"], lineup: ["lineup"], fight: ["hud"], verdict: ["verdict"] };
+  for (const id of ["welcome", "brief", "lineup", "hud", "verdict", "picker"]) $(id).classList.toggle("hidden", !map[name].includes(id));
+}
+
+/* ================= FONT LOADING ================= */
+async function loadFonts(list) {
+  document.body.classList.add("busy");
+  try { await loadFontsNow(list); } finally { document.body.classList.remove("busy"); }
+}
+async function loadFontsNow(list) {
+  const link = $("fightFonts");
+  link.href = "https://fonts.googleapis.com/css2?" + list.map(gfFamily).join("&") + "&display=swap";
+  await new Promise(r => { link.onload = r; link.onerror = r; setTimeout(r, 5000); });
+  await Promise.race([Promise.all(list.flatMap(f => [document.fonts.load(`400 40px "${f.name}"`, "Aa"), document.fonts.load(`700 40px "${f.name}"`, "Aa")])), sleep(4000)]).catch(() => {});
+}
+// Previews in the picker only fetch the letters of each font's own name.
+const previewQueue = new Set(), previewed = new Set();
+let previewTimer = null;
+function queuePreview(name) {
+  if (previewed.has(name)) return; previewed.add(name); previewQueue.add(name);
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => {
+    const names = [...previewQueue]; previewQueue.clear(); if (!names.length) return;
+    const text = [...new Set(names.join(""))].join("");
+    const l = document.createElement("link"); l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?" + names.map(n => "family=" + encodeURIComponent(n).replace(/%20/g, "+")).join("&") + "&text=" + encodeURIComponent(text) + "&display=swap";
+    document.head.append(l);
+  }, 120);
+}
+
+/* ================= WELCOME / HELP ================= */
+let helpReturn = null;
+function openHelp() { helpReturn = screen; $("welcome").classList.remove("hidden"); $("welcomeGo").textContent = screen === "welcome" ? "Let's go" : "Back to the show"; $("welcomeGo").focus(); }
+$("welcomeGo").onclick = () => {
+  sfx.unlock(); store.set("seen", true);
+  if (helpReturn && helpReturn !== "welcome") { $("welcome").classList.add("hidden"); helpReturn = null; return; }
+  showScreen("brief"); $("name").focus();
+};
+document.querySelectorAll("[data-help]").forEach(b => b.onclick = openHelp);
+
+/* ================= BRIEF ================= */
+function chips(box, items, set, labels, onToggle, autoSet) {
+  box.innerHTML = "";
+  items.forEach(k => {
+    const b = el("button", "chip" + (autoSet && autoSet.has(k) && set.has(k) ? " auto" : ""), labels ? labels[k] : k[0].toUpperCase() + k.slice(1)); b.type = "button"; b.setAttribute("aria-pressed", set.has(k));
+    b.onclick = () => onToggle(k);
+    box.append(b);
+  });
+}
+function renderTones() {
+  chips($("tones"), TONES, tonesOn, null, k => {
+    userTouched.add(k); autoTones.delete(k);
+    if (tonesOn.has(k)) tonesOn.delete(k);
+    else if (tonesOn.size >= 3) { $("briefErr").textContent = "Pick up to 3. Tap one to remove it first."; return; }
+    else tonesOn.add(k);
+    $("briefErr").textContent = ""; renderTones();
+  }, autoTones);
+  $("toneCount").textContent = `${tonesOn.size} / 3`;
+  $("toneLegend").classList.toggle("hidden", ![...autoTones].some(k => tonesOn.has(k)));
+  renderRounds();
+}
+function renderRounds() {
+  const n = tonesOn.size + usesOn.size;
+  $("roundsNote").textContent = n ? `${n} round${n === 1 ? "" : "s"} booked. Each pick is one round.` : "Each pick becomes a round.";
+}
+const renderUses = () => { chips($("uses"), Object.keys(USES), usesOn, USES, k => { usesOn.has(k) ? usesOn.delete(k) : usesOn.add(k); $("briefErr").textContent = ""; renderUses(); }); renderRounds(); };
+function autoDetect() {
+  for (const k of [...autoTones]) if (!detectTones($("desc").value).includes(k)) { tonesOn.delete(k); autoTones.delete(k); }
+  for (const k of detectTones($("desc").value)) if (!tonesOn.has(k) && !userTouched.has(k) && tonesOn.size < 3) { tonesOn.add(k); autoTones.add(k); }
+  renderTones();
+}
+$("desc").addEventListener("input", autoDetect);
+{
+  const box = document.querySelector(".examples");
+  EXAMPLES.forEach(ex => { const b = el("button", "chip", ex.label); b.type = "button"; b.onclick = () => {
+    $("name").value = ex.name; $("desc").value = ex.desc; tonesOn.clear(); autoTones.clear(); userTouched.clear(); autoDetect();
+    usesOn.clear(); ex.uses.forEach(u => usesOn.add(u)); renderUses(); $("briefErr").textContent = ""; sfx.pop();
+  }; box.append(b); });
+}
+$("briefForm").onsubmit = async e => {
+  e.preventDefault(); sfx.unlock();
+  const name = $("name").value.trim(), desc = $("desc").value.trim();
+  if (!name) { $("briefErr").textContent = "Give your product a name. The fonts will use it."; $("name").focus(); return; }
+  if (!usesOn.size) { $("briefErr").textContent = "Pick at least one place the font will be used."; return; }
+  if (!tonesOn.size) { ["friendly", "trustworthy"].forEach(k => { tonesOn.add(k); autoTones.add(k); }); renderTones(); }
+  const criteria = criteriaNow();
+  const recommended = pickContenders(criteria);
+  state = { name, desc, criteria, recommended, lineup: recommended.slice() };
+  store.set("brief", { name, desc, tones: [...tonesOn], uses: [...usesOn] });
+  const goHTML = $("briefGo").innerHTML;
+  $("briefGo").disabled = true; $("briefGo").textContent = "Booking the contenders";
+  await enterLineup();
+  $("briefGo").disabled = false; $("briefGo").innerHTML = goHTML;
+};
+
+/* ================= LINEUP ================= */
+async function buildFighters() {
+  await loadFonts(state.lineup);
+  stage.clear(); floaters.length = 0; state.partner = null;
+  state.fighters = state.lineup.map((f, i) => {
+    const ch = { ...f, hp: 100, color: SLOT[i], slot: i, home: HOME[i].clone() };
+    const podium = new THREE.Group();
+    const base = mesh(new THREE.CylinderGeometry(1.9, 2.2, 0.7, 48), smooth(0x232c4d, { roughness: 0.5 })); base.position.y = 0.35;
+    const cap = mesh(new THREE.CylinderGeometry(1.78, 1.78, 0.04, 48), smooth(0x2e3961, { roughness: 0.35, metalness: 0.2 }), false); cap.position.y = 0.71;
+    const ring = mesh(new THREE.TorusGeometry(1.92, 0.085, 10, 64), smooth(ch.color, { emissive: ch.color, emissiveIntensity: 1 }), false);
+    ring.rotation.x = Math.PI / 2; ring.position.y = 0.72;
+    const foot = mesh(new THREE.TorusGeometry(2.22, 0.05, 8, 64), smooth(ch.color, { emissive: ch.color, emissiveIntensity: 0.6 }), false); foot.rotation.x = Math.PI / 2; foot.position.y = 0.04;
+    podium.add(base, cap, ring, foot); podium.position.copy(ch.home); stage.add(podium); ch.podium = podium;
+    // A key light per corner so each fighter stands in its own pool of light
+    const spot = new THREE.SpotLight(0xffffff, 0.6, 40, 0.3, 0.8, 1.2); spot.position.set(ch.home.x * 0.7, 15, ch.home.z + 7); spot.target = podium; stage.add(spot); ch.spot = spot;
+    const glow = new THREE.PointLight(ch.color, 0.55, 7, 2); glow.position.copy(ch.home).setY(1.2).add(new THREE.Vector3(0, 0, 1.6)); stage.add(glow);
+    const root = buildCharacter(ch); root.position.copy(ch.home).setY(0); stage.add(root);
+    ch.yaw = ch.homeYaw = Math.atan2(-ch.home.x, 18 - ch.home.z);
+    return ch;
+  });
+  // Giant floating letters behind the stands, one per contender
+  state.fighters.forEach((ch, i) => {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), new THREE.MeshBasicMaterial({ map: glyphTexture(ch.name, ["A", "g", "&"][i], "#e9edf2", 512), transparent: true, side: THREE.DoubleSide, opacity: 0.85 }));
+    p.position.set((i - 1) * 20, 9 + (i === 1 ? 6 : 0), -24 - (i === 1 ? 10 : 0)); p.userData.spin = 0.2 + i * 0.07; stage.add(p); floaters.push(p);
+  });
+}
+const floaters = [];
+
+async function enterLineup() {
+  await buildFighters();
+  showScreen("lineup"); shotLineup();
+  setJumbo(state.name, "Meet the contenders", "keep them or swap any font");
+  renderLineup();
+  for (const ch of state.fighters) { gtween(380, t => ch.root.position.y = Math.sin(t * Math.PI) * 1.2); sfx.pop(); await sleep(140); }
+  $("startFight").focus();
+}
+function renderLineup() {
+  const changed = state.lineup.some((f, i) => f !== state.recommended[i]);
+  $("lineupSub").textContent = changed
+    ? `Your lineup for ${state.name}. The debate judges them on your brief either way.`
+    : `Our three bookings for ${state.name}, ranked by fit. Keep them, or swap in a font you already have in mind.`;
+  $("resetLineup").classList.toggle("hidden", !changed);
+  const box = $("slots"); box.innerHTML = "";
+  const CORNERS = ["Blue corner", "Green corner", "Amber corner"];
+  state.fighters.forEach((ch, i) => {
+    const mine = state.lineup[i] !== state.recommended[i], pct = fitPct(ch, state.criteria);
+    const s = el("div", `slot s${i} wipe`); s.style.animationDelay = (120 + i * 90) + "ms";
+    s.innerHTML = `<span class="corner">${CORNERS[i]}${mine ? "<em>Your pick</em>" : ""}</span>
+      <div class="fname"></div><div class="spec"></div>
+      <div class="fit"><b>${pct}<small>%</small></b><span class="meter"><i style="width:${pct}%"></i></span><span class="note">fit</span></div>
+      <dl class="stats"><dt>Style</dt><dd>${KIND_LABEL[ch.cat]}</dd><dt>Weights</dt><dd>${(ch.weights || [400]).length}</dd><dt>Scores</dt><dd>${ch.estimated ? "Estimated" : "Hand-scored"}</dd></dl>
+      <p class="pro"></p>`;
+    s.querySelector(".fname").textContent = ch.name; s.querySelector(".fname").style.fontFamily = fam(ch);
+    s.querySelector(".spec").textContent = state.name; s.querySelector(".spec").style.fontFamily = fam(ch);
+    s.querySelector(".pro").textContent = ch.pro;
+    const swap = el("button", "btn small"); swap.type = "button"; swap.innerHTML = `<svg class="i"><use href="#i-swap"/></svg>Swap font`; swap.onclick = () => openPicker(i);
+    s.append(swap); box.append(s);
+  });
+}
+$("toBrief").onclick = () => { showScreen("brief"); camIdle(); };
+$("resetLineup").onclick = async () => { state.lineup = state.recommended.slice(); await buildFighters(); renderLineup(); };
+$("startFight").onclick = () => startFight();
+
+/* ================= PICKER ================= */
+let pickSlot = 0, pickCat = "All";
+const CAT_FILTERS = ["All", "Sans", "Serif", "Display", "Hand", "Mono"];
+let pickRows = null;
+function openPicker(slot) {
+  pickSlot = slot; $("pTitle").textContent = slot < 0 ? "Pick your own font" : `Swap ${state.lineup[slot].name} for…`;
+  if (!pickRows) pickRows = allFontNames().map(n => fontByName(n));
+  pickRows.forEach(f => f._fit = fitPct(f, state.criteria));
+  $("picker").classList.remove("hidden"); $("pSearch").value = ""; renderPicker(); $("pSearch").focus();
+}
+function closePicker() { $("picker").classList.add("hidden"); if (state) state.pickForVerdict = false; }
+$("pClose").onclick = closePicker;
+$("picker").addEventListener("click", e => { if (e.target === $("picker")) closePicker(); });
+chips($("pCats"), CAT_FILTERS, new Set([pickCat]), Object.fromEntries(CAT_FILTERS.map(c => [c, c === "All" ? "All" : KIND_LABEL[c]])), function onCat(k) { pickCat = k; chips($("pCats"), CAT_FILTERS, new Set([pickCat]), Object.fromEntries(CAT_FILTERS.map(c => [c, c === "All" ? "All" : KIND_LABEL[c]])), onCat); renderPicker(); });
+$("pSearch").addEventListener("input", () => renderPicker());
+$("pSort").onchange = () => renderPicker();
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { queuePreview(e.target.dataset.name); io.unobserve(e.target); } }), { root: $("pList") });
+function renderPicker() {
+  const q = $("pSearch").value.trim().toLowerCase(), sort = $("pSort").value;
+  let rows = pickRows.filter(f => (pickCat === "All" || f.cat === pickCat) && (!q || f.name.toLowerCase().includes(q)));
+  rows.sort(sort === "fit" ? (a, b) => b._fit - a._fit || a.pop - b.pop : sort === "pop" ? (a, b) => a.pop - b.pop : (a, b) => a.name.localeCompare(b.name));
+  const LIMIT = 80, list = $("pList"); list.innerHTML = ""; list.scrollTop = 0;
+  const taken = new Set(state.lineup.map(f => f.name));
+  for (const f of rows.slice(0, LIMIT)) {
+    const b = el("button", "prow"); b.type = "button"; b.dataset.name = f.name; b.setAttribute("role", "option"); b.disabled = taken.has(f.name);
+    const n = el("span", "pn", f.name); n.style.fontFamily = fam(f);
+    const m = el("span", "pm", `${KIND_LABEL[f.cat]} · ${f.weights.length} weight${f.weights.length > 1 ? "s" : ""}${taken.has(f.name) ? " · already in the lineup" : ""}`);
+    const p = el("span", "pf"); p.append(`${f._fit}%`, el("small", null, f.curated ? "hand-scored" : "estimated"));
+    b.append(n, m, p); b.onclick = () => choose(f); list.append(b); io.observe(b);
+  }
+  $("pCount").textContent = rows.length ? (rows.length > LIMIT ? `Showing ${LIMIT} of ${rows.length.toLocaleString()} fonts. Keep typing to narrow it down.` : `${rows.length.toLocaleString()} font${rows.length > 1 ? "s" : ""}`) : "No fonts match. Try a shorter search.";
+}
+async function choose(f) {
+  const forVerdict = state.pickForVerdict; closePicker();
+  if (forVerdict) { await loadFonts([...state.fighters, f]); setFinal(f); return; }
+  state.lineup[pickSlot] = f;
+  await buildFighters(); renderLineup(); sfx.pop();
+  const ch = state.fighters[pickSlot]; gtween(420, t => ch.root.position.y = Math.sin(t * Math.PI) * 1.6);
+}
+
+/* ================= FIGHT HUD ================= */
+function sampleHTML(kind) {
+  const n = esc(state.name), d = esc(state.desc || "A product people will love using every day.");
+  if (kind === "ui") return `<div class="s-ui"><small>Email address</small><div class="in">you@${n.toLowerCase().replace(/\s+/g, "")}.com</div><div class="bt">Continue to ${n}</div></div>`;
+  if (kind === "head") return `<div class="s-head">${n} makes it simple.</div>`;
+  if (kind === "read") return `<div class="s-read">${d} ${d}</div>`;
+  if (kind === "num") return `<div class="s-num">₹1,234,567.89<br>0O Il1 5S 8B<br>+12.5% · #A0O1</div>`;
+  if (kind === "brand") return `<div class="s-brand">${n}</div>`;
+  if (kind === "intro") return `<div class="s-intro">Aa Gg Rr<small>${n} · Hamburgefonstiv 0123</small></div>`;
+  return `<div class="s-vibe"><b>${n}</b><span>${d}</span></div>`;
+}
+function renderTray(kind) {
+  const box = $("tray"); box.innerHTML = "";
+  state.fighters.forEach((ch, i) => {
+    const c = el("div", `tcard s${i}`); c.id = "tcard" + i;
+    c.innerHTML = `<div class="top"><span class="nm"></span><span class="hpn"></span></div><div class="hp"><b></b><i></i></div><div class="sample"></div>`;
+    c.setAttribute("aria-label", ch.name);
+    c.querySelector(".nm").textContent = ch.name; c.querySelector(".nm").style.fontFamily = fam(ch);
+    const s = c.querySelector(".sample"); s.innerHTML = sampleHTML(kind); s.style.fontFamily = fam(ch);
+    box.append(c);
+  });
+  updateTray();
+}
+function updateTray(hitIdx) {
+  state.fighters.forEach((ch, i) => {
+    const c = $("tcard" + i); if (!c) return;
+    c.classList.toggle("ko", ch.hp <= 0); c.classList.toggle("win", state.winner === ch);
+    c.querySelector(".hpn").innerHTML = `${ch.hp}<small>HP</small>`;
+    const bar = c.querySelector(".hp i"); bar.style.width = ch.hp + "%"; bar.classList.toggle("low", ch.hp < 35);
+    c.querySelector(".hp b").style.width = ch.hp + "%";
+    if (i === hitIdx) { c.classList.remove("hit"); void c.offsetWidth; c.classList.add("hit"); }
+  });
+}
+function setTrayKind(kind) {
+  state.fighters.forEach((ch, i) => { const s = document.querySelector(`#tcard${i} .sample`); if (!s) return; s.style.opacity = 0; setTimeout(() => { s.innerHTML = sampleHTML(kind); s.style.opacity = 1; }, 200); });
+}
+const markLead = ch => state.fighters.forEach((f, i) => $("tcard" + i)?.classList.toggle("lead", f === ch));
+// Lower third: a name tab in the speaker's corner colour over a paper bar set in the speaker's own font.
+let spoken = Promise.resolve();
+function say(ch, text, extra) {
+  const d = $("dialog"); d.innerHTML = "";
+  state.fighters.forEach(f => f.talking = false);
+  const who = el("span", "who", ch ? ch.name : "The arena"), voiced = voice.on && !rush; // hurrying a round skips the voices too
+  if (ch) { who.style.setProperty("--acc", ch.color); ch.talking = true; if (!voiced) setTimeout(() => { ch.talking = false; }, Math.min(2200, 300 + text.length * 35)); }
+  const bar = el("div", "bar3"), l = el("span", "line" + (ch ? "" : " narr"), ch ? `“${text}”` : text);
+  if (ch) l.style.fontFamily = fam(ch);
+  bar.append(l); if (extra) bar.append(el("span", "dmg", extra));
+  d.append(who, bar);
+  spoken = voiced ? voice.speak(ch, text) : Promise.resolve();
+}
+// Hold the scene until the line is finished: at least `ms` of reading time, longer if it's still being spoken
+const hold = ms => Promise.all([spoken, wait(ms)]);
+function setPill(kicker, title) {
+  $("pillKicker").textContent = kicker; $("pillTitle").textContent = title;
+  const dots = $("pillDots"); dots.innerHTML = "";
+  state.criteria.forEach((c, i) => dots.append(el("i", i < state.round ? "done" : i === state.round ? "now" : "")));
+}
+function setNext(label, enabled = true) { $("next").innerHTML = `${esc(label)} <kbd>Space</kbd>`; $("next").dataset.label = label; $("next").disabled = !enabled; }
+// Listeners turn to the speaker; the speaker faces the audience.
+const lookAll = target => state.fighters.forEach(f => { if (f.hp > 0) f.lookAt = f === target ? null : target; });
+
+/* coach marks, shown once */
+function coach(anchor, text, key, arrowLeft) {
+  if (store.get("coach-" + key, false)) return null;
+  const r = anchor.getBoundingClientRect(), c = el("div", "coach"); c.innerHTML = esc(text);
+  const x = el("button", "x", "Got it"); x.type = "button"; x.onclick = () => { c.remove(); store.set("coach-" + key, true); }; c.append(x);
+  document.body.append(c);
+  const w = c.offsetWidth, h = c.offsetHeight;
+  const left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+  c.style.left = left + "px"; c.style.top = Math.max(8, r.top - h - 16) + "px";
+  c.style.setProperty("--arrow", (arrowLeft ?? (r.left + r.width / 2 - left)) + "px");
+  return () => { if (c.isConnected) { c.remove(); store.set("coach-" + key, true); } };
+}
+let dismissCoach = [];
+
+/* ================= MATCH FLOW ================= */
+async function startFight() {
+  sfx.unlock();
+  state.round = 0; state.winner = null; state.final = null;
+  state.fighters.forEach(ch => ch.lookAt = null);
+  showScreen("fight"); renderTray("intro"); setNext("Round 1", false);
+  setSoundIcon();
+  busy = true; rush = false;
+  setJumbo(state.name, "Font Debate", `${state.criteria.length} rounds · last one standing wins`);
+  setPill("Opening statements", "Meet the contenders");
+  shotWide(); say(null, `Three typefaces think they're right for ${state.name}. Let's hear them out.`); cheer = 1; sfx.cheer(1.4);
+  await hold(1800);
+  for (const ch of state.fighters) {
+    shotOn(ch); lookAll(ch); await camArrived();
+    gtween(420, t => ch.root.position.y = Math.sin(t * Math.PI) * 1.1); markLead(ch); setMood(ch, "smug");
+    say(ch, ch.pro); cheer = 0.6; await hold(2500); setMood(ch, "idle");
+  }
+  markLead(null); state.fighters.forEach(f => f.lookAt = null);
+  shotWide(); say(null, `${state.criteria.length} rounds, one for each part of your brief. Lose a round and you lose HP. Hit zero and you're out.`);
+  setPill("Ready", `${state.criteria.length} rounds ahead`);
+  busy = false; rush = false; setNext("Round 1");
+  dismissCoach = [coach($("next"), "Press Space or tap here to start each round.", "next"), coach($("tray"), "These cards show every round's test in each font. Compare them yourself.", "tray", 60)].filter(Boolean);
+  if ($("auto").checked) autoAdvance();
+}
+
+function roundInfo(c) { return c.kind === "use" ? ROUND_COPY[c.key] : [`Vibe check: ${c.key}`, `Which one feels most ${c.key}?`, TONE_LINES[c.key]]; }
+
+async function nextRound() {
+  if (busy) { rush = true; voice.stop(); return; }
+  dismissCoach.forEach(f => f()); dismissCoach = [];
+  const alive = state.fighters.filter(f => f.hp > 0);
+  if (state.round >= state.criteria.length || alive.length <= 1) return finish();
+  const c = state.criteria[state.round];
+  busy = true; rush = false; setNext("Faster ▸▸");
+  const [title, sub, boast] = roundInfo(c);
+  setPill(`Round ${state.round + 1} of ${state.criteria.length}`, title);
+  setJumbo(`Round ${state.round + 1} / ${state.criteria.length}`, title, sub);
+  setTrayKind(c.kind === "use" ? c.key : "vibe");
+  shotWide(); say(null, `Round ${state.round + 1}: ${title}. ${sub}`); sfx.bell(); cheer = 0.8;
+  await hold(2200);
+  const { leaders, hits } = playRound(state.fighters, c);
+  state.round++;
+  if (!hits.length) {
+    say(null, "Dead even. Every font holds its ground."); state.fighters.filter(f => f.hp > 0).forEach(f => { setMood(f, "smug"); gtween(400, t => f.root.position.y = Math.sin(t * Math.PI) * 0.5); });
+    await hold(1600); state.fighters.forEach(f => f.hp > 0 && setMood(f, "idle"));
+  } else {
+    const lead = leaders[0];
+    letterbox(true); markLead(lead); lookAll(lead);
+    shotOn(lead, { dur: 500 }); await camArrived();
+    setMood(lead, "smug"); await gtween(420, t => lead.root.position.y = Math.sin(t * Math.PI) * 1.4);
+    say(lead, boast); await hold(1900);
+    for (const h of hits) await attack(lead, h.f, h.dmg);
+    setMood(lead, "smug"); letterbox(false); markLead(null);
+  }
+  state.fighters.forEach(f => { f.lookAt = null; if (f.hp > 0) setMood(f, "idle"); });
+  shotWide();
+  const left = state.fighters.filter(f => f.hp > 0);
+  const last = state.round >= state.criteria.length || left.length <= 1;
+  if (hits.length) say(null, `Round ${state.round} goes to ${leaders.map(l => l.name).join(" and ")}.${last ? " That's the final bell." : ""}`);
+  setPill(`Round ${state.round} of ${state.criteria.length} done`, last ? "Final bell" : `Next: ${roundInfo(state.criteria[state.round])[0]}`);
+  busy = false; rush = false;
+  setNext(last ? "See the verdict" : `Round ${state.round + 1}`);
+  if ($("auto").checked) autoAdvance();
+}
+let autoTimer = null;
+function autoAdvance() { clearTimeout(autoTimer); autoTimer = setTimeout(() => { if ($("auto").checked && !busy && screen === "fight") nextRound(); }, 1600); }
+$("auto").onchange = () => { if ($("auto").checked && !busy) autoAdvance(); };
+
+async function attack(att, def, dmg) {
+  const ko = def.hp <= 0, ai = state.fighters.indexOf(def);
+  const a0 = att.root.position.clone(), d0 = def.root.position.clone(), dir = d0.clone().sub(a0).setY(0).normalize();
+  att.lookAt = def; def.lookAt = att; setMood(att, "angry"); setMood(def, "idle");
+  shotOverShoulder(att, def);
+  say(att, def.con, `${def.name} −${dmg} HP`);
+  await hold(1300);
+  // wind-up, then dash
+  att.lockYaw = true; att.root.rotation.y = Math.atan2(dir.x, dir.z);
+  await gtween(200, t => { att.root.position.copy(a0).addScaledVector(dir, -0.6 * easeOut(t)); att.torso.scale.x = 1 + t * 0.12; att.torso.userData.sy = 1 - t * 0.15; att.punch = -t; });
+  sfx.whoosh();
+  const stop = d0.clone().addScaledVector(dir, -1.7);
+  await gtween(170, t => { att.root.position.lerpVectors(a0.clone().addScaledVector(dir, -0.6), stop, t * t); att.root.position.y = Math.sin(t * Math.PI) * 0.6; att.torso.scale.x = 0.9; att.torso.userData.sy = 1.15; att.punch = Math.max(0.01, t); });
+  // IMPACT
+  att.torso.scale.x = 1; att.torso.userData.sy = 1;
+  shotImpact(def, att); flashScreen(ko ? 1 : 0.75); sfx.impact(ko ? 1 : dmg / 50);
+  shockwave(d0, att.color); debris(d0, att, ko ? 24 : 14); damageNumber(d0, dmg);
+  setMood(def, "hurt"); updateTray(ai); cheer = 1.3; cam.shake = ko ? 1 : 0.6;
+  await hitStop(ko ? 160 : 95);
+  if (ko) { await knockout(def, att, dir); }
+  else {
+    slowMo(0.35, 420);
+    await gtween(300, t => { def.root.position.copy(d0).addScaledVector(dir, 0.9 * easeOut(t)); def.rig.rotation.x = -0.45 * Math.sin(t * Math.PI); });
+  }
+  // attacker returns
+  shotWide({ dur: 550 });
+  await gtween(380, t => { att.root.position.lerpVectors(stop, a0, ease(t)); att.root.position.y = Math.sin(t * Math.PI) * 0.4; att.punch = 1 - t; });
+  att.punch = 0; att.lockYaw = false; setMood(att, "smug");
+  if (!ko) { gtween(380, t => def.root.position.lerpVectors(d0.clone().addScaledVector(dir, 0.9), d0, ease(t))); setMood(def, "idle"); }
+  await wait(500);
+}
+
+async function knockout(def, att, dir) {
+  sfx.ko(); cheer = 2;
+  if (!RM) { timeScale = 0.25; canvas.style.filter = "saturate(.15) contrast(1.2)"; }
+  showLabels(false); cam.orbit = { at: def.root.position.clone(), r: 5.2, h: 2.4, lookY: 1.6, speed: RM ? 0 : 1.6, a: Math.atan2(dir.z, -dir.x) };
+  const ko = $("ko"); ko.querySelector("span").style.fontFamily = fam(att); ko.classList.remove("hidden", "show"); void ko.offsetWidth; ko.classList.add("show");
+  setMood(def, "ko"); def.lockYaw = true; def.talking = false;
+  const p0 = def.root.position.clone(), y0 = def.root.rotation.y;
+  await gtween(420, t => { def.root.position.copy(p0).addScaledVector(dir, 2.2 * easeOut(t)); def.root.position.y = Math.sin(t * Math.PI) * 1.6; def.root.rotation.y = y0 + t * Math.PI * 1.5; def.rig.rotation.x = -t * Math.PI / 2; def.lift.position.y = PODIUM_TOP + (LYING - PODIUM_TOP) * t * t; });
+  def.blob.visible = false; addStars(def); sfx.cheer(2);
+  await wait(1500);
+  timeScale = 1; canvas.style.filter = ""; ko.classList.add("hidden"); cam.orbit = null;
+  say(null, `${def.name} is knocked out!`);
+}
+
+async function finish() {
+  if (busy) return;
+  busy = true; clearTimeout(autoTimer); dismissCoach.forEach(f => f()); dismissCoach = [];
+  setNext("…", false);
+  // Skipping still plays the remaining rounds by the same rules, just without the show
+  while (state.round < state.criteria.length && state.fighters.filter(f => f.hp > 0).length > 1) playRound(state.fighters, state.criteria[state.round++]);
+  state.fighters.forEach(f => { if (f.hp <= 0 && f.mood !== "ko") { setMood(f, "ko"); f.rig.rotation.x = -Math.PI / 2; f.lift.position.y = PODIUM_TOP + LYING; f.blob.visible = false; } });
+  const w = winnerOf(state.fighters, state.criteria); state.winner = w; state.final = w;
+  updateTray(); markLead(null);
+  setPill("Last one standing", w.name);
+  setJumbo("Last one standing", w.name, `the font for ${state.name}`, fam(w));
+  say(w, "I'll take it from here."); setMood(w, "happy");
+  letterbox(true);
+  const losers = state.fighters.filter(f => f !== w);
+  await gtween(800, t => losers.forEach(f => { f.root.position.y = -t * 4; f.podium.position.y = -t * 4; }));
+  losers.forEach(f => { f.root.visible = f.podium.visible = false; if (f.spot) f.spot.visible = false; });
+  const from = w.podium.position.clone();
+  w.lookAt = null; w.yaw = w.homeYaw = 0;
+  await gtween(1100, t => { const k = ease(t); w.podium.position.lerpVectors(from, CENTER, k); w.podium.scale.y = 1 + k; w.root.position.lerpVectors(from, CENTER, k); w.root.position.y = k * PODIUM_TOP + Math.sin(t * Math.PI) * 1.6; });
+  sfx.fanfare(); sfx.cheer(2.5); confetti(w); cheer = 2.2;
+  // Gentle sway in front of the winner so we always see its face
+  cam.orbit = { at: CENTER.clone(), r: 8.5, h: 4.9, lookY: 3.3, speed: RM ? 0 : 0.35, a: 0, sway: 0.55 };
+  await sleep(1400);
+  letterbox(false);
+  showVerdict();
+  busy = false;
+}
+
+/* ================= VERDICT ================= */
+function showVerdict() {
+  const w = state.winner;
+  showScreen("verdict");
+  $("vFor").textContent = state.name;
+  const top = state.criteria.slice().sort((a, b) => score(w, b) - score(w, a)).slice(0, 3);
+  const ul = $("vWhy"); ul.innerHTML = "";
+  [w.pro, ...top.map(c => `${c.kind === "use" ? USES[c.key] : "Feels " + c.key}: ${score(w, c)}/5`), `Watch out: ${w.con}`].forEach(t => ul.append(el("li", null, t)));
+  // scorecard
+  const tb = $("vScore"); tb.innerHTML = "";
+  const head = el("tr"); head.append(el("th", null, "Test")); state.fighters.forEach(f => { const th = el("th", "f", f.name); th.style.fontFamily = fam(f); th.style.color = f.color; th.scope = "col"; head.append(th); }); tb.append(head);
+  for (const c of state.criteria) {
+    const tr = el("tr"); tr.append(el("td", null, c.kind === "use" ? USES[c.key] : c.key[0].toUpperCase() + c.key.slice(1)));
+    const best = Math.max(...state.fighters.map(f => score(f, c)));
+    state.fighters.forEach(f => {
+      const s = score(f, c), td = el("td", s === best ? "best" : ""), pips = el("span", "pips");
+      for (let k = 0; k < 5; k++) pips.append(el("i", k < s ? "on" : ""));
+      td.style.setProperty("--acc", f.color); td.title = `${s} / 5`; td.setAttribute("aria-label", `${f.name}: ${s} out of 5`); td.append(pips); tr.append(td);
+    });
+    tb.append(tr);
+  }
+  const hpRow = el("tr"); hpRow.append(el("td", null, "Final HP")); state.fighters.forEach(f => hpRow.append(el("td", "hpcell" + (f.hp > 0 ? "" : " out"), f.hp > 0 ? `${f.hp}` : "K.O."))); tb.append(hpRow);
+  // your call
+  const seg = $("vPick"); seg.innerHTML = "";
+  [...state.fighters.slice().sort((a, b) => (b === w) - (a === w) || b.hp - a.hp)].forEach(f => {
+    const b = el("button"); b.type = "button"; const n = el("span", null, f.name); n.style.fontFamily = fam(f);
+    b.append(n, el("small", null, f === w ? "Arena's pick" : f.hp > 0 ? `${f.hp} HP` : "Knocked out")); b.onclick = () => setFinal(f); b.dataset.name = f.name; seg.append(b);
+  });
+  const other = el("button"); other.type = "button"; other.append(el("span", null, "Another font…"), el("small", null, "any Google font")); other.onclick = () => { state.pickForVerdict = true; openPicker(-1); }; seg.append(other);
+  setFinal(w);
+  $("verdict").scrollTop = 0; $("copy").focus({ preventScroll: true });
+}
+function setFinal(f) {
+  const w = state.winner; state.final = f;
+  document.querySelectorAll("#vPick button").forEach(b => b.setAttribute("aria-pressed", b.dataset.name === f.name));
+  $("vName").textContent = f.name; $("vName").style.fontFamily = fam(f); $("vName").style.color = f.color || "var(--fg)";
+  $("vPickNote").textContent = f === w ? "" : `You overruled the arena with ${f.name}. Fair enough, it's your product.`;
+  $("vLink").href = "https://fonts.google.com/specimen/" + f.name.replace(/ /g, "+");
+  if (f !== w) setJumbo("Your pick", f.name, `the font for ${state.name}`, fam(f)); else setJumbo("Last one standing", w.name, `the font for ${state.name}`, fam(w));
+  // Pairing: offered for every font, pre-selected only when this one can't carry body text
+  state.pairs = pairingsFor(f, state.criteria);
+  const box = $("vPairs"); box.innerHTML = "";
+  const row = (i, name, tag, font) => { const b = el("button"); b.type = "button"; b.dataset.i = i; const n = el("span", null, name); if (font) n.style.fontFamily = fam(font); b.append(n, el("small", null, tag)); b.onclick = () => setPair(i, true); box.append(b); };
+  row(-1, "On its own", "one font");
+  state.pairs.forEach((p, i) => row(i, p.font.name, p.role === "body" ? "for body text" : "for headlines", p.font));
+  loadFonts([...state.fighters, f, ...state.pairs.map(p => p.font)]).then(() => { if (state && state.final === f) setPair(state.pairIdx, false); });
+  setPair(needsPartner(f, state.criteria) && state.pairs.length ? 0 : -1, false);
+}
+function setPair(i, announce) {
+  const f = state.final, p = state.pairs[i] || null; state.pairIdx = p ? i : -1;
+  document.querySelectorAll("#vPairs button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.i === state.pairIdx));
+  const heading = p ? p.heading : f, body = p ? p.body : f;
+  $("vSpec").innerHTML = "";
+  const sb = el("b", null, state.name), ss = el("span", null, state.desc || "A product people will love using every day.");
+  sb.style.fontFamily = fam(heading); ss.style.fontFamily = fam(body); $("vSpec").append(sb, ss);
+  if (p) $("vSpec").append(el("small", null, `Headlines in ${heading.name} · Body in ${body.name}`));
+  $("vPair").textContent = p ? p.why : needsPartner(f, state.criteria)
+    ? `${f.name} is weak at body text. Pick a partner for paragraphs and UI.`
+    : `${f.name} can carry everything alone. For more contrast, add a partner.`;
+  $("vCss").textContent = p ? cssFor(heading, body) : cssFor(f, null);
+  setPartner(p, announce);
+}
+// The chosen partner walks on stage next to the winner
+function setPartner(p, announce) {
+  if (state.partner) { stage.remove(state.partner.root); state.partner = null; }
+  if (!p || screen !== "verdict") return;
+  const ch = { ...p.font, hp: 100, color: "#f3f5fa", slot: 3, home: CENTER.clone().add(new THREE.Vector3(-3.1, 0, -1.1)) };
+  const root = buildCharacter(ch);
+  ch.lift.position.y = 0; ch.blob.position.y = 0.03; ch.label.position.y -= PODIUM_TOP; // it stands on the floor, not a podium
+  root.position.copy(ch.home); ch.yaw = ch.homeYaw = 0.3; root.rotation.y = 0.3;
+  stage.add(root); state.partner = ch;
+  gtween(480, t => { root.position.y = Math.sin(t * Math.PI) * 1.4; root.scale.setScalar(0.4 + 0.6 * easeOut(t)); });
+  if (announce) { sfx.pop(); setMood(ch, "smug"); const line = p.role === "body" ? "Leave the paragraphs to me." : "I'll take the headlines."; ch.talking = true; voice.speak(ch, line).then(() => { ch.talking = false; if (state && state.partner === ch) setMood(ch, "idle"); }); if (!voice.on) setTimeout(() => { ch.talking = false; }, 1400); }
+}
+$("copy").onclick = async () => { try { await navigator.clipboard.writeText($("vCss").textContent); $("copy").textContent = "Copied"; } catch { $("copy").textContent = "Select it above"; } setTimeout(() => $("copy").textContent = "Copy CSS", 1800); };
+$("rematch").onclick = async () => { voice.stop(); canvas.style.filter = ""; await enterLineup(); };
+$("again").onclick = () => { voice.stop(); stage.clear(); floaters.length = 0; state = null; showScreen("brief"); camIdle(); setJumbo("Font Debate", "Who's your font?", "write a brief to start"); $("name").focus(); };
+$("skip").onclick = () => { voice.stop(); if (busy) { rush = true; skipAfter = true; } else finish(); };
+let skipAfter = false;
+$("next").onclick = () => nextRound();
+function setSoundIcon() { const m = sfx.muted; $("sound").innerHTML = `<svg class="i"><use href="#i-${m ? "mute" : "sound"}"/></svg>`; $("sound").setAttribute("aria-label", m ? "Turn on sound and voices" : "Mute sound and voices"); $("sound").title = m ? "Sound and voices are off" : "Sound and voices are on"; }
+$("sound").onclick = () => { sfx.toggle(); voice.stop(); setSoundIcon(); };
+
+addEventListener("keydown", e => {
+  if (e.key === "Escape") { if (!$("picker").classList.contains("hidden")) closePicker(); else if (!$("welcome").classList.contains("hidden") && helpReturn) $("welcomeGo").click(); return; }
+  const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
+  if ((e.code === "Space" || e.key === "Enter") && screen === "fight" && !typing && $("welcome").classList.contains("hidden")) { e.preventDefault(); nextRound(); }
+});
+// While "Skip" is waiting for the current round to end, finish as soon as it does.
+setInterval(() => { if (skipAfter && !busy && screen === "fight") { skipAfter = false; finish(); } }, 200);
+
+function camIdle() { cam.orbit = { at: new THREE.Vector3(0, 0, 0), r: 22, h: 9, lookY: 2, speed: 0.06, a: 0 }; }
+
+/* ================= LOOP ================= */
+const clock = new THREE.Clock();
+function loop() {
+  const dt = Math.min(0.05, clock.getDelta()), now = performance.now(), gdt = dt * timeScale * (rush ? 2.2 : 1);
+  stepTweens(gdt * 1000);
+  updateCrowd(now, dt); updateSprites(gdt);
+  floaters.forEach(p => p.rotation.y += p.userData.spin * dt);
+  if (state && state.fighters) for (const ch of state.fighters) if (ch.root) animateCharacter(ch, gdt, now);
+  if (state && state.partner) animateCharacter(state.partner, gdt, now);
+  frameView(dt); updateCamera(dt, now);
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+
+/* ================= BOOT ================= */
+{ // pick up where the last visit left off
+  const b = store.get("brief", null);
+  if (b && typeof b.name === "string") {
+    $("name").value = b.name; $("desc").value = b.desc || "";
+    tonesOn.clear(); (b.tones || []).filter(k => TONES.includes(k)).slice(0, 3).forEach(k => { tonesOn.add(k); userTouched.add(k); });
+    usesOn.clear(); (b.uses || []).filter(k => k in USES).forEach(k => usesOn.add(k)); if (!usesOn.size) usesOn.add("ui");
+  }
+}
+renderTones(); renderUses();
+Promise.race([Promise.all([document.fonts.load('800 40px "Archivo"'), document.fonts.load('500 20px "JetBrains Mono"')]), sleep(3000)]).catch(() => {}).then(() => {
+  setJumbo("Font Debate", "Who's your font?", "write a brief to start");
+  camIdle(); camera.position.set(0, 9, 22);
+  $("loading").classList.add("hidden");
+  if (store.get("seen", false)) showScreen("brief"); else showScreen("welcome");
+  loop();
+});
+</script>
+</body>
+</html>
