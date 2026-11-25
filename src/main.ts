@@ -12,6 +12,7 @@ import { floaters, initLineup } from "./lineup";
 import { initMatch } from "./match";
 import { camera, frameView, renderer, scene } from "./scene";
 import { stepTweens, time } from "./time";
+import { loadNeural, onNeuralProgress } from "./tts";
 import { $, sleep, store } from "./util";
 import { initVerdict } from "./verdict";
 
@@ -43,4 +44,10 @@ void Promise.race([Promise.all([document.fonts.load('800 40px "Archivo"'), docum
     $("loading").classList.add("hidden");
     showScreen(store.get("seen", false) ? "brief" : "welcome");
     frame();
+    // Natural voices download in the background while the visitor writes the brief
+    const status = $("voiceStatus");
+    onNeuralProgress(p => {
+      status.textContent = p === "off" ? "" : p === "ready" ? "Natural voices ready." : `Loading natural voices… ${p}%`;
+    });
+    setTimeout(() => void loadNeural(), 1200);
   });
