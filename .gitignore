@@ -1,3 +1,5 @@
 .gstack/
 .vercel/
 .DS_Store
+.vercel
+.env*
