@@ -107,7 +107,8 @@ function setPartner(p: Pairing | null, announce: boolean): void {
   const m = match();
   if (m.partner) { stage.remove(m.partner.root); m.partner = null; }
   if (!p || app.screen !== "verdict") return;
-  const ch = buildCharacter({ ...p.font, hp: 100, color: "#f3f5fa", slot: 3, home: CENTER.clone().add(new THREE.Vector3(-3.1, 0, -1.1)) });
+  // Its voice slot is the one after the winner's, so a partner of the same kind never speaks in the winner's voice
+  const ch = buildCharacter({ ...p.font, hp: 100, color: "#f3f5fa", slot: ((m.winner?.slot ?? 0) + 1) % 3, home: CENTER.clone().add(new THREE.Vector3(-3.1, 0, -1.1)) });
   ch.lift.position.y = 0; ch.blob.position.y = 0.03; ch.label.position.y -= PODIUM_TOP; // it stands on the floor, not on a podium
   ch.root.position.copy(ch.home); ch.yaw = ch.homeYaw = 0.3; ch.root.rotation.y = 0.3;
   stage.add(ch.root); m.partner = ch;

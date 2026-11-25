@@ -13,6 +13,7 @@ import { initMatch } from "./match";
 import { camera, frameView, renderer, scene } from "./scene";
 import { stepTweens, time } from "./time";
 import { loadNeural, onNeuralProgress } from "./tts";
+import { sfx } from "./audio";
 import { $, sleep, store } from "./util";
 import { initVerdict } from "./verdict";
 
@@ -49,5 +50,6 @@ void Promise.race([Promise.all([document.fonts.load('800 40px "Archivo"'), docum
     onNeuralProgress(p => {
       status.textContent = p === "off" ? "" : p === "ready" ? "Natural voices ready." : `Loading natural voices… ${p}%`;
     });
-    setTimeout(() => void loadNeural(), 1200);
+    // Skipped while sound is off (no point downloading ~330 MB of voices nobody hears); unmuting starts it
+    setTimeout(() => { if (!sfx.muted) void loadNeural(); }, 1200);
   });

@@ -1,6 +1,6 @@
 // Sound effects (synthesised, no files) and voices: natural Kokoro voices when they have loaded, the browser's built-in speech until then.
 import type { Kind } from "./logic";
-import { forSpeech, neural, speakNeural, stopNeural } from "./tts";
+import { forSpeech, loadNeural, neural, speakNeural, stopNeural } from "./tts";
 import { store } from "./util";
 
 type AudioCtor = typeof AudioContext;
@@ -42,7 +42,8 @@ export const sfx = {
   /** Browsers only allow audio after a click; call this from one. */
   unlock(): void { try { ctx(); } catch { /* no audio available */ } },
   get muted(): boolean { return muted; },
-  toggle(): boolean { muted = !muted; store.set("muted", muted); return muted; },
+  /** Unmuting is also when natural voices start loading, if they were skipped because sound was off. */
+  toggle(): boolean { muted = !muted; store.set("muted", muted); if (!muted) void loadNeural(); return muted; },
   whoosh: play(() => noiseHit("bandpass", 300, 2400, 0.28, 0.35, 0.8)),
   impact: play((power: number) => { tone(160, 38, 0.32, 0.7 + power * 0.25); noiseHit("lowpass", 2400, 300, 0.16, 0.5); }),
   ko: play(() => { tone(120, 28, 1.1, 0.95); noiseHit("lowpass", 1800, 120, 0.9, 0.6); noiseHit("bandpass", 600, 1400, 1.8, 0.25, 0.4); }),
@@ -94,7 +95,9 @@ export const voice = {
       synth?.cancel();
       const list = speaker ? KOKORO[speaker.cat] : [KOKORO_ANNOUNCER], style = speaker ? STYLE[speaker.cat] : NARRATOR;
       let how: Awaited<ReturnType<typeof speakNeural>> = "fallback";
-      try { how = await speakNeural(text, list[(speaker?.slot ?? 0) % list.length], style.rate, ctx()); } catch { /* fall through to the browser voice */ }
+      if (speaker) speaker.talking = false; // the mouth waits for the sound, not for the request
+      try { how = await speakNeural(text, list[(speaker?.slot ?? 0) % list.length], style.rate, ctx(), () => { if (speaker) speaker.talking = true; }); } catch { /* fall through to the browser voice */ }
+      if (how === "fallback" && speaker) speaker.talking = true;
       if (how !== "fallback") { if (speaker) speaker.talking = false; return; }
     }
     return this.speakBrowser(speaker, text);

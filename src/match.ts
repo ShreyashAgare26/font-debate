@@ -148,6 +148,7 @@ async function knockout(def: Fighter, att: Fighter, dir: THREE.Vector3): Promise
   await wait(1500);
   time.scale = 1; canvas.style.filter = ""; title.classList.add("hidden"); cam.orbit = null;
   say(null, `${def.name} is knocked out!`);
+  await hold(1400); // let the call finish before the next line cuts it off
 }
 
 /** Plays out any rounds left (silently, same rules), crowns the winner and opens the verdict. */
