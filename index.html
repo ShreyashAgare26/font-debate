@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Font Debate: three typefaces fight for your product</title>
+<meta name="description" content="Describe what you're building. Three typefaces argue for the job in a live 3D arena, and the last one standing is your font. Works with all 1,800+ Google Fonts.">
+<meta name="theme-color" content="#070a14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230e1428'/%3E%3Crect width='21.4' height='8' fill='%233d8bff'/%3E%3Crect x='21.3' width='21.4' height='8' fill='%2334c46b'/%3E%3Crect x='42.6' width='21.4' height='8' fill='%23ffb020'/%3E%3Ctext x='32' y='48' font-family='Helvetica,Arial,sans-serif' font-weight='800' font-size='32' text-anchor='middle' fill='%23f3f5fa'%3EAa%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" id="fightFonts">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.3 6.5a8 8 0 0 1 0 11"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.6v.2"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 6l7 6-7 6zM13 6l7 6-7 6z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 7h12l-3-3M17 17H5l3 3"/></symbol>
+</svg>
+<canvas id="gl"></canvas>
+<div id="loading">Warming up the studio</div>
+<div class="bar" id="barTop"></div><div class="bar" id="barBot"></div>
+<div id="flash"></div>
+<div id="ko" class="hidden"><span>K.O.</span></div>
+
+<!-- First-time welcome (also the Help screen) -->
+<div id="welcome" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+  <div class="plate striped welcome">
+    <h1 id="wTitle"><span>Font Debate</span><span class="two">Live from the arena</span></h1>
+    <p class="lead">Describe what you're building. Three typefaces argue for the job, <strong>live</strong>, round by round. The last one standing is your font, and you leave with the CSS.</p>
+    <ol class="show" aria-label="How it works">
+      <li><b>The brief</b><p>Name your product and say how it should feel. We read the personality from your words.</p></li>
+      <li><b>The lineup</b><p>We book three fonts that fit. Keep them, or swap in any of the 1,800+ Google Fonts.</p></li>
+      <li><b>The debate</b><p>Each round tests one part of your brief. Lose a round, lose HP. You make the final call.</p></li>
+    </ol>
+    <div class="row between"><span class="note"><kbd>Space</kbd> next round &nbsp;·&nbsp; <kbd>Esc</kbd> close &nbsp;·&nbsp; the fonts speak, so turn your sound on</span><button type="button" class="btn primary" id="welcomeGo">Let's go</button></div>
+  </div>
+</div>
+
+<!-- Step 1: brief -->
+<div id="brief" class="overlay hidden">
+  <form class="plate striped brief" id="briefForm" novalidate>
+    <div class="row between">
+      <div class="rundown" aria-label="Progress"><span class="on">Brief</span><span>Lineup</span><span>Debate</span></div>
+      <button type="button" class="btn small ghost" data-help><svg class="i"><use href="#i-help"/></svg>How it works</button>
+    </div>
+    <div class="head"><h2>What are you building?</h2><p>The more you say about the feeling, the sharper the matchup.</p></div>
+    <div class="examples"><span>Try</span></div>
+    <div class="two">
+      <label class="field"><span class="lab">Product name</span><input class="input" id="name" placeholder="Paywise" maxlength="40" autocomplete="off"></label>
+      <label class="field"><span class="lab">What is it, who is it for, how should it feel?</span><textarea class="input" id="desc" placeholder="A budgeting app for college students. Friendly and a bit fun, but people trust it with their money."></textarea></label>
+    </div>
+    <div class="field"><span class="lab"><span>Personality, up to three</span><span class="count" id="toneCount">0 / 3</span></span><div class="chips" id="tones"></div><p class="note legend hidden" id="toneLegend"><i></i>Picked from your description</p></div>
+    <div class="field"><span class="lab">Where will the font be used?</span><div class="chips" id="uses"></div></div>
+    <div class="row between"><p class="err" id="briefErr" role="alert"></p><span class="note" id="roundsNote">Each pick becomes a round.</span><button type="submit" class="btn primary" id="briefGo">Book the contenders<svg class="i"><use href="#i-arrow"/></svg></button></div>
+  </form>
+</div>
+
+<!-- Step 2: lineup -->
+<div id="lineup" class="hidden">
+  <div class="plate striped tape">
+    <div class="tape-head">
+      <div>
+        <div class="rundown"><span class="done">Brief</span><span class="on">Lineup</span><span>Debate</span></div>
+        <h2 style="margin-top:14px">Tale of the tape</h2>
+        <p id="lineupSub"></p>
+      </div>
+      <div class="row">
+        <button type="button" class="btn small ghost" id="toBrief"><svg class="i"><use href="#i-back"/></svg>Edit brief</button>
+        <button type="button" class="btn small ghost hidden" id="resetLineup">Back to our picks</button>
+        <button type="button" class="btn primary" id="startFight">Start the debate<svg class="i"><use href="#i-arrow"/></svg></button>
+      </div>
+    </div>
+    <div class="slots" id="slots"></div>
+  </div>
+</div>
+
+<!-- Font picker -->
+<div id="picker" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="plate striped picker">
+    <div class="row between"><h2 id="pTitle">Pick a font</h2><button type="button" class="btn icon-btn" id="pClose" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <input class="input" id="pSearch" placeholder="Search 1,800+ Google Fonts" autocomplete="off" aria-label="Search fonts">
+    <div class="row between"><div class="chips" id="pCats"></div>
+      <label class="row" style="gap:8px"><span class="note">Sort</span><select class="select" id="pSort"><option value="fit">Best fit</option><option value="pop">Most popular</option><option value="az">A to Z</option></select></label></div>
+    <div class="plist" id="pList" role="listbox" aria-label="Fonts"></div>
+    <p class="note" id="pCount"></p>
+  </div>
+</div>
+
+<!-- Step 3: fight HUD -->
+<div id="hud" class="hidden">
+  <div id="pill" class="plate" aria-live="polite"><div class="copy"><span class="k" id="pillKicker"></span><span class="t" id="pillTitle"></span></div><div class="dots" id="pillDots"></div></div>
+  <div id="tools">
+    <button type="button" class="btn icon-btn" id="sound" aria-label="Mute sound" title="Sound"><svg class="i"><use href="#i-sound"/></svg></button>
+    <button type="button" class="btn icon-btn" data-help aria-label="How it works" title="How it works"><svg class="i"><use href="#i-help"/></svg></button>
+    <button type="button" class="btn small" id="skip"><svg class="i"><use href="#i-skip"/></svg>Skip<span class="wide-only">&nbsp;to verdict</span></button>
+  </div>
+  <div id="bottom">
+    <div class="dialog-row">
+      <div id="dialog" aria-live="polite"></div>
+      <div class="next-col">
+        <button type="button" class="btn primary" id="next">Round 1 <kbd>Space</kbd></button>
+        <label class="auto-toggle"><input type="checkbox" id="auto"> Auto-play</label>
+      </div>
+    </div>
+    <div id="tray"></div>
+  </div>
+</div>
+
+<!-- Verdict -->
+<aside id="verdict" class="plate striped hidden" aria-label="Verdict">
+  <div class="v-head"><h2>Final result for <span id="vFor"></span></h2><p class="big" id="vName"></p></div>
+  <div class="specimen" id="vSpec"></div>
+  <div class="sect"><h3>Why it won</h3><ul id="vWhy"></ul></div>
+  <div class="sect"><h3>Scorecard</h3><table class="score" id="vScore"></table></div>
+  <hr class="divider">
+  <div class="sect"><h3>Your call</h3><p class="note">The arena advises. You decide.</p><div class="seg" id="vPick"></div><p class="note" id="vPickNote"></p></div>
+  <div class="sect"><h3>Pair it with</h3><p class="note" id="vPair"></p><div class="seg" id="vPairs"></div></div>
+  <pre id="vCss"></pre>
+  <div class="row between"><button type="button" class="btn small" id="copy">Copy CSS</button><a id="vLink" target="_blank" rel="noopener">View on Google Fonts<svg class="i"><use href="#i-out"/></svg></a></div>
+  <hr class="divider">
+  <div class="row"><button type="button" class="btn" id="rematch">Rematch</button><button type="button" class="btn primary" id="again">New brief</button></div>
+</aside>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
