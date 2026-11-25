@@ -4,6 +4,10 @@ Can't pick a font? Tell this game what you're building, and three fonts will fig
 
 **Play it:** https://font-debate.vercel.app
 
+![A font gets knocked out in the arena](docs/ko.jpg)
+
+The fonts trash-talk each other out loud, in natural voices generated right in your browser.
+
 ## How to play
 
 1. **Describe your product.** Give it a name and say how it should feel, for example "friendly but trustworthy".
@@ -45,6 +49,7 @@ The code lives in `src/`. The rules and the show are kept apart:
 | `camera.ts` | Camera shots |
 | `effects.ts` | Hit effects like flying letters and confetti |
 | `audio.ts` | Sound effects and voices |
+| `tts.ts`, `tts.worker.ts` | Natural voices: the Kokoro speech model, run on the GPU in a background worker |
 | `hud.ts` | Health bars and captions during the fight |
 | `main.ts` | Starts everything up |
 
@@ -63,3 +68,9 @@ Other commands:
 - `npm run build` makes the files to put online.
 
 The old one-file versions of the game are in the `legacy/` folder.
+
+## Voices
+
+The fonts speak with [Kokoro](https://github.com/hexgrad/kokoro), an open text-to-speech model that runs in your browser through [kokoro-js](https://www.npmjs.com/package/kokoro-js) on WebGPU. Each kind of font has its own voices, and an announcer calls the fight. The first visit downloads the model (about 330 MB, then cached). Phones and browsers without WebGPU use the browser's built-in voice instead.
+
+Made the same weekend as [Fine Print Court](https://github.com/ShreyashAgare26/fine-print-court), where Terms of Service go on trial.
